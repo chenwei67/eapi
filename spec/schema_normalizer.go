@@ -1,6 +1,9 @@
 package spec
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type schemaNormalizer struct {
 	doc *T
@@ -29,14 +32,26 @@ func (s *schemaNormalizer) normalize() *T {
 }
 
 func (s *schemaNormalizer) processPathItem(item *PathItem) {
+	fmt.Println("parsing path item:", item)
+	fmt.Println("connect operation:", item.Connect)
 	s.processOperation(item.Connect)
+	fmt.Println("Delete operation:", item.Delete)
+
 	s.processOperation(item.Delete)
+	fmt.Println("Get operation:", item.Get)
+
 	s.processOperation(item.Get)
+	fmt.Println("Head operation:", item.Head)
 	s.processOperation(item.Head)
+	fmt.Println("Options operation:", item.Options)
 	s.processOperation(item.Options)
+	fmt.Println("Patch operation:", item.Patch)
 	s.processOperation(item.Patch)
+	fmt.Println("Post operation:", item.Post)
 	s.processOperation(item.Post)
+	fmt.Println("Put operation:", item.Put)
 	s.processOperation(item.Put)
+	fmt.Println("Trace operation:", item.Trace)
 	s.processOperation(item.Trace)
 }
 
