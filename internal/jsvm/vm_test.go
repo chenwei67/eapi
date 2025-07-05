@@ -3,7 +3,7 @@ package jsvm
 import (
 	"testing"
 
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/spec"
 )
 
 func TestVM_Print(t *testing.T) {

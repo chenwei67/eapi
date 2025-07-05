@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime/debug"
 
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"

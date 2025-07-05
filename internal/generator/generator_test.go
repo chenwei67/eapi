@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/stretchr/testify/assert"
 )
 

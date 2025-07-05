@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"unicode/utf16"
 
+	"github.com/chenwei67/eapi/utils"
 	"github.com/go-openapi/jsonpointer"
-	"github.com/gotomicro/eapi/utils"
 	"github.com/mohae/deepcopy"
 	"github.com/spf13/cast"
 

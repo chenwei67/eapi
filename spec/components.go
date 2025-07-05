@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"sort"
 
+	"github.com/chenwei67/eapi/utils"
 	"github.com/getkin/kin-openapi/jsoninfo"
-	"github.com/gotomicro/eapi/utils"
 )
 
 // Components is specified by OpenAPI/Swagger standard version 3.

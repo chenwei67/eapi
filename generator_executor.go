@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gotomicro/eapi/generators"
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/generators"
+	"github.com/chenwei67/eapi/spec"
 )
 
 type generatorExecutor struct {

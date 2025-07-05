@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	analyzer "github.com/gotomicro/eapi"
-	"github.com/gotomicro/eapi/plugins/echo"
-	"github.com/gotomicro/eapi/plugins/gin"
+	analyzer "github.com/chenwei67/eapi"
+	"github.com/chenwei67/eapi/plugins/echo"
+	"github.com/chenwei67/eapi/plugins/gin"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"

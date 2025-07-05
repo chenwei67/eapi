@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gotomicro/eapi/internal/jsvm"
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/internal/jsvm"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/link-duan/goja"
 )
 

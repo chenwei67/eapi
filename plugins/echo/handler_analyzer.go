@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	analyzer "github.com/gotomicro/eapi"
-	"github.com/gotomicro/eapi/plugins/common"
-	"github.com/gotomicro/eapi/spec"
+	analyzer "github.com/chenwei67/eapi"
+	"github.com/chenwei67/eapi/plugins/common"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/iancoleman/strcase"
 	"github.com/robertkrimen/otto"
 )

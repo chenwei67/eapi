@@ -4,8 +4,8 @@ import (
 	"go/ast"
 	"go/types"
 
-	"github.com/gotomicro/eapi/spec"
-	"github.com/gotomicro/eapi/tag"
+	"github.com/chenwei67/eapi/spec"
+	"github.com/chenwei67/eapi/tag"
 )
 
 type ParamNameParser func(field string, tags map[string]string) (name, in string)

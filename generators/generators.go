@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gotomicro/eapi/internal/generator"
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/internal/generator"
+	"github.com/chenwei67/eapi/spec"
 )
 
 type Generator struct {

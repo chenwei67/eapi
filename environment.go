@@ -1,7 +1,7 @@
 package eapi
 
 import (
-	"github.com/gotomicro/eapi/annotation"
+	"github.com/chenwei67/eapi/annotation"
 	"github.com/samber/lo"
 )
 

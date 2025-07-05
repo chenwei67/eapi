@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/link-duan/goja"
 	"github.com/link-duan/goja_nodejs/console"
 	"github.com/link-duan/goja_nodejs/require"

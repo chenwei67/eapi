@@ -7,8 +7,8 @@ import (
 	"go/types"
 	"strconv"
 
-	"github.com/gotomicro/eapi/spec"
-	"github.com/gotomicro/eapi/utils"
+	"github.com/chenwei67/eapi/spec"
+	"github.com/chenwei67/eapi/utils"
 	"golang.org/x/tools/go/packages"
 )
 

@@ -1,8 +1,8 @@
 package common
 
 import (
-	"github.com/gotomicro/eapi/spec"
-	"github.com/gotomicro/eapi/utils"
+	"github.com/chenwei67/eapi/spec"
+	"github.com/chenwei67/eapi/utils"
 )
 
 type DataSchemaTransformer struct {

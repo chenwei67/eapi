@@ -1,4 +1,4 @@
-module github.com/gotomicro/eapi
+module github.com/chenwei67/eapi
 
 go 1.21.1
 

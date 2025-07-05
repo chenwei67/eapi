@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	analyzer "github.com/gotomicro/eapi"
-	"github.com/gotomicro/eapi/plugins/common"
-	"github.com/gotomicro/eapi/spec"
-	"github.com/gotomicro/eapi/tag"
+	analyzer "github.com/chenwei67/eapi"
+	"github.com/chenwei67/eapi/plugins/common"
+	"github.com/chenwei67/eapi/spec"
+	"github.com/chenwei67/eapi/tag"
 	"github.com/iancoleman/strcase"
 	"github.com/samber/lo"
 )

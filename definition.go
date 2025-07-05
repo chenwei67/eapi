@@ -5,7 +5,7 @@ import (
 	"go/ast"
 	"strings"
 
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/spec"
 	"golang.org/x/tools/go/packages"
 )
 

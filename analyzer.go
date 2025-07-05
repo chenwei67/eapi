@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/knadh/koanf"
 	"github.com/samber/lo"
 	"golang.org/x/mod/modfile"

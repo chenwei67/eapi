@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/gotomicro/eapi"
-	"github.com/gotomicro/eapi/plugins/echo"
-	"github.com/gotomicro/eapi/plugins/gin"
+	"github.com/chenwei67/eapi"
+	"github.com/chenwei67/eapi/plugins/echo"
+	"github.com/chenwei67/eapi/plugins/gin"
 )
 
 func main() {

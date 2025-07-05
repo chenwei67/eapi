@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gotomicro/eapi/annotation"
-	"github.com/gotomicro/eapi/spec"
+	"github.com/chenwei67/eapi/annotation"
+	"github.com/chenwei67/eapi/spec"
 	"github.com/samber/lo"
 )
 
