@@ -50,15 +50,15 @@ func (r *generatorExecutor) generate(t *generators.Generator) error {
 		dir := filepath.Dir(outputFile)
 		err := os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			return err
+			return fmt.Errorf("create directory %s error: %w", dir, err)
 		}
 		file, err := os.OpenFile(outputFile, os.O_CREATE|os.O_TRUNC|os.O_RDWR, os.ModePerm)
 		if err != nil {
-			return err
+			return fmt.Errorf("open file %s error: %w", outputFile, err)
 		}
 		_, err = file.WriteString(item.Code)
 		if err != nil {
-			return err
+			return fmt.Errorf("write file %s error: %w", outputFile, err)
 		}
 		file.Close()
 	}
