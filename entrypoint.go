@@ -101,24 +101,31 @@ func (e *Entrypoint) Run(args []string) {
 	app.UsageText = usageText
 	app.Description = `Tool for generating OpenAPI documentation and Frontend Code by static-analysis`
 	app.Flags = append(app.Flags, &cli.StringFlag{
-		Name:    "plugin",
-		Aliases: []string{"p", "plug"},
-		Usage:   "specify plugin name",
+		Name:        "plugin",
+		Aliases:     []string{"p", "plug"},
+		Usage:       "specify plugin name",
+		Destination: &e.cfg.Plugin,
 	})
 	app.Flags = append(app.Flags, &cli.StringFlag{
-		Name:    "dir",
-		Aliases: []string{"d"},
-		Usage:   "directory of your project which contains go.mod file",
+		Name:        "dir",
+		Aliases:     []string{"d"},
+		Usage:       "directory of your project which contains go.mod file",
+		Destination: &e.cfg.Dir,
 	})
 	app.Flags = append(app.Flags, &cli.StringFlag{
-		Name:    "output",
-		Aliases: []string{"o"},
-		Usage:   "output directory of openapi.json",
+		Name:        "output",
+		Aliases:     []string{"o"},
+		Usage:       "output directory of openapi.json",
+		Destination: &e.cfg.Output,
 	})
 	app.Flags = append(app.Flags, &cli.StringSliceFlag{
 		Name:    "depends",
 		Aliases: []string{"dep"},
 		Usage:   "depended module name",
+		Action: func(context *cli.Context, depends []string) error {
+			e.cfg.Depends = depends
+			return nil
+		},
 	})
 	app.Flags = append(app.Flags, &cli.StringFlag{
 		Name:     "config",
@@ -129,7 +136,6 @@ func (e *Entrypoint) Run(args []string) {
 
 	app.Commands = append(app.Commands, showVersion())
 
-	app.Before = e.before
 	app.Action = e.run
 
 	err := app.Run(args)
@@ -156,21 +162,6 @@ func (e *Entrypoint) before(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-
-	}
-
-	// Override with command line arguments if provided
-	if c.IsSet("plugin") {
-		e.cfg.Plugin = c.String("plugin")
-	}
-	if c.IsSet("dir") {
-		e.cfg.Dir = c.String("dir")
-	}
-	if c.IsSet("output") {
-		e.cfg.Output = c.String("output")
-	}
-	if c.IsSet("depends") {
-		e.cfg.Depends = c.StringSlice("depends")
 	}
 
 	if e.cfg.Plugin == "" {
@@ -192,6 +183,11 @@ func (e *Entrypoint) loadConfig(cfg string) error {
 
 func (e *Entrypoint) run(c *cli.Context) error {
 	var plugin Plugin
+
+	err := e.before(c)
+	if err != nil {
+		return err
+	}
 
 	for _, p := range e.plugins {
 		if p.Name() == e.cfg.Plugin {
