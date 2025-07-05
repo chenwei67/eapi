@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"server/pkg/E"
 	"server/pkg/handler"
 	"server/pkg/view"
 
@@ -80,4 +81,15 @@ func WrappedHandler(c *handler.CustomContext) {
 
 	// 自定义响应函数
 	c.JSONOK(map[string]interface{}{})
+}
+
+// TestESuccess 测试E.Success包级别函数
+// @summary 测试E.Success响应
+// @consume application/json
+// @produce application/json
+// @tags Shop
+func TestESuccess(c *gin.Context) {
+	var res view.GoodsInfoRes
+	// 使用E.Success包级别函数
+	c.JSON(http.StatusOK, E.Success(res))
 }

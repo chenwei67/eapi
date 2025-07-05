@@ -45,9 +45,24 @@ properties:
             data:
               type: 'args[0]'
         status: 200
+    # 添加E.Success包级别函数的配置
+    - type: 'server/pkg/E'
+      method: 'Success'
+      return:
+        contentType: 'application/json'
+        data:
+          type: 'object'
+          properties:
+            code:
+              type: 'number'
+            msg:
+              type: 'string'
+            data:
+              type: 'args[0]'
+        status: 200
 
 generators:
 #  - name: ts # generator name
 #    output: ./frontend/src/types # output directory
-  - file: ./plugin/custom-generator.js # for custom generator
-    output: ./frontend/ # output directory
+#  - file: ./plugin/custom-generator.js # for custom generator
+#    output: ./frontend/ # output directory

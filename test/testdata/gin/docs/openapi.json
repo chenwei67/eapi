@@ -1,31 +1,13 @@
 {
     "components": {
         "schemas": {
-            "CustomResponseType": {
-                "ext": {
-                    "type": "object",
-                    "typeParams": [
-                        {
-                            "index": 0,
-                            "name": "A",
-                            "constraint": "any"
-                        }
-                    ]
-                },
+            "CustomResponseType1[server_pkg_view.GoodsInfoRes]": {
                 "properties": {
                     "code": {
                         "type": "number"
                     },
                     "data": {
-                        "ext": {
-                            "type": "param",
-                            "typeParam": {
-                                "index": 0,
-                                "name": "A",
-                                "constraint": "any"
-                            }
-                        },
-                        "type": "typeParam"
+                        "$ref": "#/components/schemas/server_pkg_view.GoodsInfoRes"
                     },
                     "msg": {
                         "type": "string"
@@ -36,43 +18,10 @@
                     "data",
                     "msg"
                 ],
-                "title": "CustomResponseType",
+                "title": "CustomResponseType1",
                 "type": "object"
             },
-            "CustomResponseType[20c6dc665200]": {
-                "ext": {
-                    "type": "specific",
-                    "specificType": {
-                        "args": [
-                            {
-                                "additionalProperties": {
-                                    "description": "Any Type",
-                                    "ext": {
-                                        "type": "any"
-                                    },
-                                    "type": "object"
-                                },
-                                "ext": {
-                                    "type": "map",
-                                    "mapKey": {
-                                        "type": "string"
-                                    },
-                                    "mapValue": {
-                                        "description": "Any Type",
-                                        "ext": {
-                                            "type": "any"
-                                        },
-                                        "type": "object"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        ],
-                        "type": {
-                            "$ref": "#/components/schemas/CustomResponseType"
-                        }
-                    }
-                },
+            "CustomResponseType[b76073db434d]": {
                 "properties": {
                     "code": {
                         "type": "number"
@@ -80,23 +29,7 @@
                     "data": {
                         "additionalProperties": {
                             "description": "Any Type",
-                            "ext": {
-                                "type": "any"
-                            },
                             "type": "object"
-                        },
-                        "ext": {
-                            "type": "map",
-                            "mapKey": {
-                                "type": "string"
-                            },
-                            "mapValue": {
-                                "description": "Any Type",
-                                "ext": {
-                                    "type": "any"
-                                },
-                                "type": "object"
-                            }
                         },
                         "type": "object"
                     },
@@ -113,19 +46,6 @@
                 "type": "object"
             },
             "CustomResponseType[server_pkg_view.GoodsCreateRes]": {
-                "ext": {
-                    "type": "specific",
-                    "specificType": {
-                        "args": [
-                            {
-                                "$ref": "#/components/schemas/server_pkg_view.GoodsCreateRes"
-                            }
-                        ],
-                        "type": {
-                            "$ref": "#/components/schemas/CustomResponseType"
-                        }
-                    }
-                },
                 "properties": {
                     "code": {
                         "type": "number"
@@ -146,18 +66,9 @@
                 "type": "object"
             },
             "ShopGoodsDownRequest": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "dateRange": {
                         "description": "日期范围",
-                        "ext": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
                         "items": {
                             "type": "string"
                         },
@@ -180,9 +91,6 @@
             },
             "github.com_gin-gonic_gin.Param": {
                 "description": "Param is a single URL parameter, consisting of a key and a value.",
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "Key": {
                         "type": "string"
@@ -196,12 +104,6 @@
             },
             "github.com_gin-gonic_gin.Params": {
                 "description": "Params is a Param-slice, as returned by the router.\n\nThe slice is ordered, the first URL parameter is also the first slice value.\n\nIt is therefore safe to read values by the index.",
-                "ext": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/components/schemas/github.com_gin-gonic_gin.Param"
-                    }
-                },
                 "items": {
                     "$ref": "#/components/schemas/github.com_gin-gonic_gin.Param"
                 },
@@ -214,9 +116,6 @@
                 "type": "string"
             },
             "server_pkg_shop.GoodsInfoPathParams": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "guid": {
                         "description": "Goods Guid",
@@ -234,38 +133,10 @@
                     10002,
                     10003
                 ],
-                "ext": {
-                    "type": "enum",
-                    "enumItems": [
-                        {
-                            "key": "CodeNotFound",
-                            "value": 10000,
-                            "description": "Resource not found"
-                        },
-                        {
-                            "key": "CodeCancled",
-                            "value": 10001,
-                            "description": "Request canceld"
-                        },
-                        {
-                            "key": "CodeUnknown",
-                            "value": 10002,
-                            "description": ""
-                        },
-                        {
-                            "key": "CodeInvalidArgument",
-                            "value": 10003,
-                            "description": ""
-                        }
-                    ]
-                },
                 "title": "ViewErrCode",
                 "type": "integer"
             },
             "server_pkg_view.Error": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "code": {
                         "$ref": "#/components/schemas/server_pkg_view.ErrCode"
@@ -278,9 +149,6 @@
                 "type": "object"
             },
             "server_pkg_view.GoodsCreateReq": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "cover": {
                         "description": "封面图",
@@ -288,12 +156,6 @@
                     },
                     "images": {
                         "description": "详情图",
-                        "ext": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/components/schemas/server_pkg_view.Image"
-                            }
-                        },
                         "items": {
                             "$ref": "#/components/schemas/server_pkg_view.Image"
                         },
@@ -320,9 +182,6 @@
                 "type": "object"
             },
             "server_pkg_view.GoodsCreateRes": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "Status": {
                         "description": "测试引用第三方包",
@@ -335,9 +194,6 @@
                     "raw": {
                         "deprecated": true,
                         "description": "测试引用内置包类型",
-                        "ext": {
-                            "type": "any"
-                        },
                         "type": "object"
                     },
                     "selfRef": {
@@ -353,9 +209,6 @@
                 "type": "object"
             },
             "server_pkg_view.GoodsDownRes": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "Status": {
                         "type": "string"
@@ -365,9 +218,6 @@
                 "type": "object"
             },
             "server_pkg_view.GoodsInfoRes": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "cover": {
                         "type": "string"
@@ -379,15 +229,6 @@
                         "additionalProperties": {
                             "$ref": "#/components/schemas/server_pkg_view.Property"
                         },
-                        "ext": {
-                            "type": "map",
-                            "mapKey": {
-                                "type": "integer"
-                            },
-                            "mapValue": {
-                                "$ref": "#/components/schemas/server_pkg_view.Property"
-                            }
-                        },
                         "type": "object"
                     },
                     "price": {
@@ -396,15 +237,6 @@
                     "properties": {
                         "additionalProperties": {
                             "$ref": "#/components/schemas/server_pkg_view.Property"
-                        },
-                        "ext": {
-                            "type": "map",
-                            "mapKey": {
-                                "type": "string"
-                            },
-                            "mapValue": {
-                                "$ref": "#/components/schemas/server_pkg_view.Property"
-                            }
                         },
                         "type": "object"
                     },
@@ -420,9 +252,6 @@
             },
             "server_pkg_view.Image": {
                 "description": "Image 商品图片",
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "url": {
                         "description": "图片链接",
@@ -436,9 +265,6 @@
                 "type": "object"
             },
             "server_pkg_view.Property": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "title": {
                         "type": "string"
@@ -448,9 +274,6 @@
                 "type": "object"
             },
             "server_pkg_view.SelfRefType": {
-                "ext": {
-                    "type": "object"
-                },
                 "properties": {
                     "data": {
                         "type": "string"
@@ -641,6 +464,28 @@
                 ]
             }
         },
+        "/api/test/e-success": {
+            "get": {
+                "description": "测试E.Success包级别函数",
+                "operationId": "shop.TestESuccess",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomResponseType1[server_pkg_view.GoodsInfoRes]"
+                                }
+                            }
+                        },
+                        "description": "使用E.Success包级别函数"
+                    }
+                },
+                "summary": "测试E.Success响应",
+                "tags": [
+                    "Shop"
+                ]
+            }
+        },
         "/api/v2/goods/{guid}": {
             "get": {
                 "description": "GoodsInfo 商品详情",
@@ -707,7 +552,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CustomResponseType[20c6dc665200]"
+                                    "$ref": "#/components/schemas/CustomResponseType[b76073db434d]"
                                 }
                             }
                         },
@@ -718,9 +563,6 @@
                             "application/json": {
                                 "schema": {
                                     "description": "Any Json Type",
-                                    "ext": {
-                                        "type": "any"
-                                    },
                                     "type": "object"
                                 }
                             }

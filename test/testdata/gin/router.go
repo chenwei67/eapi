@@ -34,13 +34,16 @@ func ServeHttp() *gin.Engine {
 			g.POST("/goods", handler.Handler(shop.GoodsCreate))
 			g.POST("/goods/:guid/down", shop.GoodsDown)
 		}
-		g := g.Group("/v2")
-		g.GET("/goods/:guid", shop.GoodsInfo)
+		v2 := g.Group("/v2")
+		v2.GET("/goods/:guid", shop.GoodsInfo)
 	}
 
 	// controller style
 	goodsController := controller.NewGoodsController()
 	g.DELETE("/controller/goods/:guid", goodsController.Delete)
+
+	// 测试E.Success包级别函数
+	g.GET("/test/e-success", shop.TestESuccess)
 
 	return r
 }
