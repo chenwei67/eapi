@@ -220,7 +220,7 @@ func (e *Entrypoint) run(c *cli.Context) error {
 	{
 		docContent, err := json.MarshalIndent(doc, "", "    ")
 		if err != nil {
-			return err
+			return fmt.Errorf("json MarshalIndent err: %s", err.Error())
 		}
 		err = os.WriteFile(filepath.Join(e.cfg.Output, "openapi.json"), docContent, fs.ModePerm)
 		if err != nil {
