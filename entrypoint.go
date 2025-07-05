@@ -213,9 +213,11 @@ func (e *Entrypoint) run(c *cli.Context) error {
 	}
 	fmt.Printf("output directory: %s\n", e.cfg.Output)
 	a := NewAnalyzer(e.k).Plugin(plugin).Depends(e.cfg.Depends...)
+	fmt.Printf("doc0")
 	doc := a.Process(e.cfg.Dir).Doc().Specialize()
+	fmt.Printf("doc1")
 	e.cfg.OpenAPI.ApplyToDoc(doc)
-	fmt.Printf("doc")
+	fmt.Printf("doc2")
 	// write documentation
 	{
 		docContent, err := json.MarshalIndent(doc, "", "    ")
