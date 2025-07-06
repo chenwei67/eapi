@@ -213,9 +213,19 @@ func (e *Entrypoint) run(c *cli.Context) error {
 	}
 	fmt.Printf("output directory: %s\n", e.cfg.Output)
 	a := NewAnalyzer(e.k).Plugin(plugin).Depends(e.cfg.Depends...)
-	fmt.Printf("doc0")
-	doc := a.Process(e.cfg.Dir).Doc().Specialize()
-	fmt.Printf("doc1")
+	fmt.Printf("doc0: 开始处理文档\n")
+	
+	// 获取原始文档
+	fmt.Printf("doc0.1: 开始Process处理\n")
+	processedAnalyzer := a.Process(e.cfg.Dir)
+	fmt.Printf("doc0.2: Process处理完成\n")
+	
+	rawDoc := processedAnalyzer.Doc()
+	fmt.Printf("doc0.3: 获取原始文档完成，开始Specialize处理\n")
+	
+	// 执行Specialize，这里可能出现unknown type error
+	doc := rawDoc.Specialize()
+	fmt.Printf("doc1: Specialize处理完成\n")
 	e.cfg.OpenAPI.ApplyToDoc(doc)
 	fmt.Printf("doc2")
 	// write documentation
