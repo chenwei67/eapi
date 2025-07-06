@@ -71,6 +71,8 @@ func (a *Analyzer) Depends(pkgNames ...string) *Analyzer {
 }
 
 func (a *Analyzer) Process(packagePath string) *Analyzer {
+	fmt.Printf("Process: 开始处理包路径 %s\n", packagePath)
+
 	if len(a.plugins) <= 0 {
 		panic("must register plugin before processing")
 	}
@@ -79,39 +81,69 @@ func (a *Analyzer) Process(packagePath string) *Analyzer {
 	if err != nil {
 		panic("invalid package path: " + err.Error())
 	}
+	fmt.Printf("Process: 绝对路径解析完成: %s\n", packagePath)
+
+	// 使用defer来捕获可能的panic
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Process: 发生panic: %v\n", r)
+			panic(r) // 重新抛出panic
+		}
+	}()
 
 	var visited = make(map[string]struct{})
+	fmt.Printf("Process: 开始加载包\n")
 	pkgList := a.load(packagePath)
-	for _, pkg := range pkgList {
-		a.definitions = make(Definitions)
-		for _, p := range pkg {
-			a.loadDefinitionsFromPkg(p, p.Module.Dir)
-		}
+	fmt.Printf("Process: 包加载完成，共%d个包组\n", len(pkgList))
 
-		for _, pkg := range pkg {
+	for pkgGroupIdx, pkg := range pkgList {
+		fmt.Printf("Process: 处理第%d个包组，包含%d个包\n", pkgGroupIdx+1, len(pkg))
+		a.definitions = make(Definitions)
+
+		fmt.Printf("Process: 开始加载定义\n")
+		for pkgIdx, p := range pkg {
+			fmt.Printf("Process: 加载第%d个包的定义: %s\n", pkgIdx+1, p.PkgPath)
+			a.loadDefinitionsFromPkg(p, p.Module.Dir)
+			fmt.Printf("Process: 完成第%d个包的定义加载: %s\n", pkgIdx+1, p.PkgPath)
+		}
+		fmt.Printf("Process: 定义加载完成\n")
+
+		fmt.Printf("Process: 开始处理文件\n")
+		for pkgIdx, pkg := range pkg {
+			fmt.Printf("Process: 处理第%d个包: %s\n", pkgIdx+1, pkg.PkgPath)
 			moduleDir := pkg.Module.Dir
 			InspectPackage(pkg, func(pkg *packages.Package) bool {
+				fmt.Printf("Process: 检查包: %s\n", pkg.PkgPath)
 				if _, ok := visited[pkg.PkgPath]; ok {
+					fmt.Printf("Process: 包已访问，跳过: %s\n", pkg.PkgPath)
 					return false
 				}
 				visited[pkg.PkgPath] = struct{}{}
 				if pkg.Module == nil || pkg.Module.Dir != moduleDir {
+					fmt.Printf("Process: 包模块不匹配，跳过: %s\n", pkg.PkgPath)
 					return false
 				}
 				if DEBUG {
 					fmt.Printf("inspect %s\n", pkg.PkgPath)
 				}
 
+				fmt.Printf("Process: 创建上下文并处理文件，包: %s，文件数: %d\n", pkg.PkgPath, len(pkg.Syntax))
 				ctx := a.context().Block().WithPackage(pkg)
-				for _, file := range pkg.Syntax {
+				for fileIdx, file := range pkg.Syntax {
+					fmt.Printf("Process: 处理第%d个文件\n", fileIdx+1)
 					a.processFile(ctx.Block().WithFile(file), file, pkg)
+					fmt.Printf("Process: 完成第%d个文件处理\n", fileIdx+1)
 				}
+				fmt.Printf("Process: 完成包处理: %s\n", pkg.PkgPath)
 
 				return true
 			})
+			fmt.Printf("Process: 完成第%d个包的所有处理: %s\n", pkgIdx+1, pkg.PkgPath)
 		}
+		fmt.Printf("Process: 完成第%d个包组的文件处理\n", pkgGroupIdx+1)
 	}
 
+	fmt.Printf("Process: 所有处理完成\n")
 	return a
 }
 
@@ -132,28 +164,48 @@ func (a *Analyzer) analyze(ctx *Context, node ast.Node) {
 const entryPackageName = "command-line-arguments"
 
 func (a *Analyzer) load(pkgPath string) [][]*packages.Package {
+	fmt.Printf("load: 开始加载包路径 %s\n", pkgPath)
+
 	absPath, err := filepath.Abs(pkgPath)
 	if err != nil {
 		panic("invalid package path: " + pkgPath)
 	}
+	fmt.Printf("load: 绝对路径: %s\n", absPath)
+
+	// 使用defer来捕获可能的panic
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("load: 发生panic: %v\n", r)
+			panic(r) // 重新抛出panic
+		}
+	}()
 
 	var pkgList []*build.Package
+	fmt.Printf("load: 开始遍历目录\n")
 	filepath.Walk(absPath, func(path string, info fs.FileInfo, err error) error {
+		fmt.Printf("load: 检查路径 %s\n", path)
 		if !info.IsDir() {
+			fmt.Printf("load: 跳过文件 %s\n", path)
 			return nil
 		}
+		fmt.Printf("load: 尝试导入目录 %s\n", path)
 		pkg, err := build.Default.ImportDir(path, build.ImportComment)
 		if err != nil {
 			var noGoErr = &build.NoGoError{}
 			if errors.As(err, &noGoErr) {
+				fmt.Printf("load: 目录无Go文件，跳过 %s\n", path)
 				return nil
 			}
+			fmt.Printf("load: 导入目录失败 %s: %v\n", path, err)
 			panic("import directory failed: " + err.Error())
 		}
+		fmt.Printf("load: 成功导入包 %s (路径: %s)\n", pkg.Name, path)
 		pkgList = append(pkgList, pkg)
 		return filepath.SkipDir
 	})
+	fmt.Printf("load: 目录遍历完成，找到%d个包\n", len(pkgList))
 
+	fmt.Printf("load: 创建packages.Config\n")
 	config := &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedImports |
@@ -167,35 +219,54 @@ func (a *Analyzer) load(pkgPath string) [][]*packages.Package {
 		Tests:      false,
 		Dir:        absPath,
 	}
+	fmt.Printf("load: packages.Config创建完成\n")
+
 	var res [][]*packages.Package
-	for _, pkg := range pkgList {
+	fmt.Printf("load: 开始处理%d个包\n", len(pkgList))
+	for pkgIdx, pkg := range pkgList {
+		fmt.Printf("load: 处理第%d个包: %s (目录: %s)\n", pkgIdx+1, pkg.Name, pkg.Dir)
 		var files []string
 		for _, filename := range append(pkg.GoFiles, pkg.CgoFiles...) {
-			files = append(files, filepath.Join(pkg.Dir, filename))
+			filePath := filepath.Join(pkg.Dir, filename)
+			files = append(files, filePath)
+			fmt.Printf("load: 添加文件: %s\n", filePath)
 		}
+		fmt.Printf("load: 包%s共有%d个文件，开始调用packages.Load\n", pkg.Name, len(files))
+
 		packs, err := packages.Load(config, files...)
 		if err != nil {
+			fmt.Printf("load: packages.Load失败: %v\n", err)
 			panic("load packages failed: " + err.Error())
 		}
+		fmt.Printf("load: packages.Load成功，返回%d个包\n", len(packs))
 
 		// 前面的 packages.Load() 方法不能解析出以第一层的 Module
 		// 所以这里手动解析 go.mod
-		for _, p := range packs {
+		fmt.Printf("load: 开始处理Module信息\n")
+		for packIdx, p := range packs {
+			fmt.Printf("load: 检查第%d个包的Module: %s\n", packIdx+1, p.PkgPath)
 			if p.Module != nil {
+				fmt.Printf("load: 包%s已有Module，跳过\n", p.PkgPath)
 				continue
 			}
 
+			fmt.Printf("load: 包%s无Module，开始解析go.mod\n", p.PkgPath)
 			module := a.parseGoModule(pkgPath)
 			if module == nil {
+				fmt.Printf("load: 解析go.mod失败\n")
 				panic("failed to parse go.mod file in " + pkgPath)
 			}
+			fmt.Printf("load: 解析go.mod成功，模块路径: %s\n", module.Path)
 			p.Module = module
 			p.PkgPath = entryPackageName
 			p.ID = module.Path
+			fmt.Printf("load: 包%s的Module信息设置完成\n", p.PkgPath)
 		}
+		fmt.Printf("load: 第%d个包处理完成\n", pkgIdx+1)
 		res = append(res, packs)
 	}
 
+	fmt.Printf("load: 所有包处理完成，返回%d个包组\n", len(res))
 	return res
 }
 
@@ -241,14 +312,27 @@ func (a *Analyzer) funDecl(ctx *Context, node *ast.FuncDecl, file *ast.File, pkg
 }
 
 func (a *Analyzer) loadDefinitionsFromPkg(pkg *packages.Package, moduleDir string) {
+	fmt.Printf("loadDefinitionsFromPkg: 开始加载包定义: %s\n", pkg.PkgPath)
+
+	// 使用defer来捕获可能的panic
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("loadDefinitionsFromPkg: 发生panic: %v\n", r)
+			panic(r) // 重新抛出panic
+		}
+	}()
+
 	var visited = make(map[string]struct{})
 	InspectPackage(pkg, func(pkg *packages.Package) bool {
+		fmt.Printf("loadDefinitionsFromPkg: 检查包: %s\n", pkg.PkgPath)
 		if _, ok := visited[pkg.PkgPath]; ok {
+			fmt.Printf("loadDefinitionsFromPkg: 包已访问，跳过: %s\n", pkg.PkgPath)
 			return false
 		}
 		visited[pkg.PkgPath] = struct{}{}
 
 		if pkg.Module == nil { // Go 内置包
+			fmt.Printf("loadDefinitionsFromPkg: Go内置包，检查依赖: %s\n", pkg.PkgPath)
 			ignore := true
 			for _, depend := range a.depends {
 				if strings.HasPrefix(pkg.PkgPath, depend) {
@@ -257,25 +341,35 @@ func (a *Analyzer) loadDefinitionsFromPkg(pkg *packages.Package, moduleDir strin
 				}
 			}
 			if ignore {
+				fmt.Printf("loadDefinitionsFromPkg: 内置包不在依赖中，跳过: %s\n", pkg.PkgPath)
 				return false
 			}
+			fmt.Printf("loadDefinitionsFromPkg: 内置包在依赖中，继续处理: %s\n", pkg.PkgPath)
 		} else {
+			fmt.Printf("loadDefinitionsFromPkg: 检查模块目录匹配: %s (模块目录: %s, 期望: %s)\n", pkg.PkgPath, pkg.Module.Dir, moduleDir)
 			if pkg.Module.Dir != moduleDir && !lo.Contains(a.depends, pkg.Module.Path) {
+				fmt.Printf("loadDefinitionsFromPkg: 模块目录不匹配且不在依赖中，跳过: %s\n", pkg.PkgPath)
 				return false
 			}
+			fmt.Printf("loadDefinitionsFromPkg: 模块检查通过，继续处理: %s\n", pkg.PkgPath)
 		}
 
-		for _, file := range pkg.Syntax {
+		fmt.Printf("loadDefinitionsFromPkg: 开始处理包的语法文件，共%d个文件: %s\n", len(pkg.Syntax), pkg.PkgPath)
+		for fileIdx, file := range pkg.Syntax {
+			fmt.Printf("loadDefinitionsFromPkg: 处理第%d个文件\n", fileIdx+1)
 			ast.Inspect(file, func(node ast.Node) bool {
 				switch node := node.(type) {
 				case *ast.FuncDecl:
+					fmt.Printf("loadDefinitionsFromPkg: 找到函数定义: %s\n", node.Name.Name)
 					a.definitions.Set(NewFuncDefinition(pkg, file, node))
 					return false
 				case *ast.TypeSpec:
+					fmt.Printf("loadDefinitionsFromPkg: 找到类型定义: %s\n", node.Name.Name)
 					a.definitions.Set(NewTypeDefinition(pkg, file, node))
 					return false
 				case *ast.GenDecl:
 					if node.Tok == token.CONST {
+						fmt.Printf("loadDefinitionsFromPkg: 找到常量定义\n")
 						a.loadEnumDefinition(pkg, file, node)
 						return false
 					}
@@ -283,9 +377,12 @@ func (a *Analyzer) loadDefinitionsFromPkg(pkg *packages.Package, moduleDir strin
 				}
 				return true
 			})
+			fmt.Printf("loadDefinitionsFromPkg: 完成第%d个文件处理\n", fileIdx+1)
 		}
+		fmt.Printf("loadDefinitionsFromPkg: 完成包处理: %s\n", pkg.PkgPath)
 		return true
 	})
+	fmt.Printf("loadDefinitionsFromPkg: 包定义加载完成: %s\n", pkg.PkgPath)
 }
 
 type A int
