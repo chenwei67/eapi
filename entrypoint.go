@@ -21,6 +21,7 @@ type Config struct {
 	Output     string
 	Depends    []string
 	StrictMode bool
+	LogLevel   string `yaml:"logLevel"`
 	OpenAPI    OpenAPIConfig
 
 	Generators []*GeneratorConfig
@@ -78,9 +79,10 @@ func NewEntrypoint(plugins ...Plugin) *Entrypoint {
 		k:       koanf.New("."),
 		plugins: plugins,
 		cfg: Config{
-			Plugin: "gin",
-			Dir:    ".",
-			Output: "docs",
+			Plugin:   "gin",
+			Dir:      ".",
+			Output:   "docs",
+			LogLevel: "info",
 		},
 	}
 }
@@ -140,6 +142,13 @@ func (e *Entrypoint) Run(args []string) {
 		Usage:       "enable strict mode - show red error logs instead of skipping issues",
 		Destination: &e.cfg.StrictMode,
 	})
+	app.Flags = append(app.Flags, &cli.StringFlag{
+		Name:        "log-level",
+		Aliases:     []string{"l"},
+		Usage:       "set log level (silent, error, warn, info, debug)",
+		Value:       "info",
+		Destination: &e.cfg.LogLevel,
+	})
 
 	app.Commands = append(app.Commands, showVersion())
 
@@ -181,6 +190,11 @@ func (e *Entrypoint) before(c *cli.Context) error {
 		e.cfg.Output = "docs"
 	}
 
+	// Initialize global logger
+	logLevel := ParseLogLevel(e.cfg.LogLevel)
+	SetGlobalLogLevel(logLevel)
+	SetGlobalLogStrictMode(e.cfg.StrictMode)
+
 	return nil
 }
 
@@ -218,24 +232,24 @@ func (e *Entrypoint) run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("output directory: %s\n", e.cfg.Output)
+	LogInfo("output directory: %s", e.cfg.Output)
 	if e.cfg.StrictMode {
-		fmt.Printf("\033[33m[STRICT MODE]\033[0m Enabled - errors will be reported instead of skipped\n")
+		LogWarn("[STRICT MODE] Enabled - errors will be reported instead of skipped")
 	}
 	a := NewAnalyzer(e.k).Plugin(plugin).Depends(e.cfg.Depends...).WithStrictMode(e.cfg.StrictMode)
-	fmt.Printf("doc0: 开始处理文档\n")
+	LogDebug("doc0: 开始处理文档")
 
 	// 获取原始文档
-	fmt.Printf("doc0.1: 开始Process处理\n")
+	LogDebug("doc0.1: 开始Process处理")
 	processedAnalyzer := a.Process(e.cfg.Dir)
-	fmt.Printf("doc0.2: Process处理完成\n")
+	LogDebug("doc0.2: Process处理完成")
 
 	rawDoc := processedAnalyzer.Doc()
-	fmt.Printf("doc0.3: 获取原始文档完成，开始Specialize处理\n")
+	LogDebug("doc0.3: 获取原始文档完成，开始Specialize处理")
 
 	// 执行Specialize，这里可能出现unknown type error
 	doc := rawDoc.Specialize()
-	fmt.Printf("doc1: Specialize处理完成\n")
+	LogDebug("doc1: Specialize处理完成")
 	e.cfg.OpenAPI.ApplyToDoc(doc)
 	// write documentation
 	{
@@ -278,11 +292,11 @@ func showVersion() *cli.Command {
 		Action: func(c *cli.Context) error {
 			info, ok := debug.ReadBuildInfo()
 			if !ok {
-				fmt.Printf("unknown version\n")
+				LogInfo("unknown version")
 				os.Exit(1)
 				return nil
 			}
-			fmt.Printf("%s\n", info.Main.Version)
+			LogInfo("%s", info.Main.Version)
 			return nil
 		},
 	}

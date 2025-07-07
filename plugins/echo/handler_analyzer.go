@@ -2,7 +2,6 @@ package echo
 
 import (
 	"go/ast"
-	"log"
 	"net/http"
 	"strings"
 
@@ -266,12 +265,14 @@ func (p *handlerAnalyzer) evaluate(call *ast.CallExpr, code string) interface{} 
 	_ = env.Set("args", call.Args)
 	output, err := env.Run(code)
 	if err != nil {
-		log.Fatalln("evaluate failed", err)
+		eapi.LogError("evaluate failed: %v", err)
+		panic(err)
 	}
 
 	value, err := output.Export()
 	if err != nil {
-		log.Fatalln("evaluate failed", err)
+		eapi.LogError("evaluate failed: %v", err)
+		panic(err)
 	}
 
 	return value

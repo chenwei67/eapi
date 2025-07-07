@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 )
@@ -27,7 +26,7 @@ func transformValue(v reflect.Value) interface{} {
 		return v.Interface()
 	}
 
-	fmt.Printf("unsupported type %v", v)
+	// unsupported type, panic with error
 	panic("unexpected type")
 }
 

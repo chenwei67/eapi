@@ -46,11 +46,7 @@ func (r *generatorExecutor) execute() (err error) {
 
 func (r *generatorExecutor) generate(t *generators.Generator) error {
 	errorLogger := func(format string, args ...interface{}) {
-		if r.strictMode {
-			fmt.Printf("\033[31m[ERROR]\033[0m "+format+"\n", args...)
-		} else {
-			fmt.Fprintf(os.Stderr, format+"\n", args...)
-		}
+		LogStrictError(format, args...)
 	}
 	result := t.Print(r.doc, &generators.PrintOptions{
 		GetConfig:   r.getConfig,

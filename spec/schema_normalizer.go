@@ -1,7 +1,6 @@
 package spec
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -14,181 +13,181 @@ func newSchemaNormalizer(doc *T) *schemaNormalizer {
 }
 
 func (s *schemaNormalizer) normalize() *T {
-	fmt.Printf("normalize: 开始规范化处理\n")
-	
-	// 处理Components.Schemas
-	fmt.Printf("normalize: 开始处理Components.Schemas，共%d个schema\n", len(s.doc.Components.Schemas))
+	// normalize: 开始规范化处理
+
+	// 处理 Components.Schemas
+	// normalize: 开始处理Components.Schemas
 	for key, ref := range s.doc.Components.Schemas {
-		fmt.Printf("normalize: 处理schema key=%s\n", key)
+		// normalize: 处理schema
 		if ref == nil || ref.Ref != "" {
-			fmt.Printf("normalize: 跳过schema key=%s (ref为空或有引用)\n", key)
+			// normalize: 跳过schema (ref为空或有引用)
 			continue
 		}
 		ext := ref.ExtendedTypeInfo
 		if ext == nil || ext.Type != ExtendedTypeSpecific {
-			fmt.Printf("normalize: 跳过schema key=%s (ExtendedTypeInfo为空或类型不匹配)\n", key)
+			// normalize: 跳过schema (ExtendedTypeInfo为空或类型不匹配)
 			continue
 		}
 
-		fmt.Printf("normalize: 开始处理特定类型schema key=%s\n", key)
+		// normalize: 开始处理特定类型schema
 		s.doc.Components.Schemas[key] = s.process(ext.SpecificType.Type, ext.SpecificType.Args)
-		fmt.Printf("normalize: 完成处理特定类型schema key=%s\n", key)
+		// normalize: 完成处理特定类型schema
 	}
-	
-	// 处理Paths
-	fmt.Printf("normalize: 开始处理Paths，共%d个路径\n", len(s.doc.Paths))
-	for pathKey, item := range s.doc.Paths {
-		fmt.Printf("normalize: 开始处理路径 %s\n", pathKey)
-		s.processPathItem(item)
-		fmt.Printf("normalize: 完成处理路径 %s\n", pathKey)
+
+	// 处理 Paths
+	// normalize: 开始处理Paths
+	for _, pathItem := range s.doc.Paths {
+		// normalize: 开始处理路径
+		s.processPathItem(pathItem)
+		// normalize: 完成处理路径
 	}
-	
-	fmt.Printf("normalize: 规范化处理完成\n")
+
+	// normalize: 规范化处理完成
 	return s.doc
 }
 
 func (s *schemaNormalizer) processPathItem(item *PathItem) {
-	fmt.Printf("processPathItem: 开始处理PathItem\n")
+	// processPathItem: 开始处理PathItem
 	
 	if item == nil {
-		fmt.Printf("processPathItem: PathItem为nil，跳过处理\n")
+		// processPathItem: PathItem为nil，跳过处理
 		return
 	}
 	
 	// 使用defer来捕获可能的panic
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("processPathItem: 发生panic: %v\n", r)
+			// processPathItem: 发生panic
 			panic(r) // 重新抛出panic
 		}
 	}()
 	
-	fmt.Printf("processPathItem: 处理Connect操作\n")
+	// processPathItem: 处理Connect操作
 	s.processOperation(item.Connect)
 	
-	fmt.Printf("processPathItem: 处理Delete操作\n")
+	// processPathItem: 处理Delete操作
 	s.processOperation(item.Delete)
 	
-	fmt.Printf("processPathItem: 处理Get操作\n")
+	// processPathItem: 处理Get操作
 	s.processOperation(item.Get)
 	
-	fmt.Printf("processPathItem: 处理Head操作\n")
+	// processPathItem: 处理Head操作
 	s.processOperation(item.Head)
 	
-	fmt.Printf("processPathItem: 处理Options操作\n")
+	// processPathItem: 处理Options操作
 	s.processOperation(item.Options)
 	
-	fmt.Printf("processPathItem: 处理Patch操作\n")
+	// processPathItem: 处理Patch操作
 	s.processOperation(item.Patch)
 	
-	fmt.Printf("processPathItem: 处理Post操作\n")
+	// processPathItem: 处理Post操作
 	s.processOperation(item.Post)
 	
-	fmt.Printf("processPathItem: 处理Put操作\n")
+	// processPathItem: 处理Put操作
 	s.processOperation(item.Put)
 	
-	fmt.Printf("processPathItem: 处理Trace操作\n")
+	// processPathItem: 处理Trace操作
 	s.processOperation(item.Trace)
 	
-	fmt.Printf("processPathItem: PathItem处理完成\n")
+	// processPathItem: PathItem处理完成
 }
 
 func (s *schemaNormalizer) processSchemaRef(ref *Schema) *Schema {
-	fmt.Printf("processSchemaRef: 开始处理SchemaRef\n")
+	// processSchemaRef: 开始处理SchemaRef
 	
 	if ref == nil {
-		fmt.Printf("processSchemaRef: Schema为nil，返回nil\n")
+		// processSchemaRef: Schema为nil，返回nil
 		return ref
 	}
 	
 	if ref.Ref != "" {
-		fmt.Printf("processSchemaRef: Schema有引用 %s，直接返回\n", ref.Ref)
+		// processSchemaRef: Schema有引用，直接返回
 		return ref
 	}
 	
 	ext := ref.ExtendedTypeInfo
 	if ext == nil {
-		fmt.Printf("processSchemaRef: ExtendedTypeInfo为nil，直接返回\n")
+		// processSchemaRef: ExtendedTypeInfo为nil，直接返回
 		return ref
 	}
 	
 	if ext.Type != ExtendedTypeSpecific {
-		fmt.Printf("processSchemaRef: ExtendedTypeInfo类型不是ExtendedTypeSpecific (实际类型: %v)，直接返回\n", ext.Type)
+		// processSchemaRef: ExtendedTypeInfo类型不是ExtendedTypeSpecific，直接返回
 		return ref
 	}
 	
-	fmt.Printf("processSchemaRef: 开始处理特定类型，调用process方法\n")
+	// processSchemaRef: 开始处理特定类型，调用process方法
 	
 	// 使用defer来捕获可能的panic
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("processSchemaRef: 在process方法中发生panic: %v\n", r)
+			// processSchemaRef: 在process方法中发生panic
 			panic(r) // 重新抛出panic
 		}
 	}()
 	
 	result := s.process(ext.SpecificType.Type, ext.SpecificType.Args)
-	fmt.Printf("processSchemaRef: process方法执行完成\n")
+	// processSchemaRef: process方法执行完成
 	return result
 }
 
 func (s *schemaNormalizer) processOperation(op *Operation) {
-	fmt.Printf("processOperation: 开始处理Operation\n")
+	// processOperation: 开始处理Operation
 	
 	if op == nil {
-		fmt.Printf("processOperation: Operation为nil，跳过处理\n")
+		// processOperation: Operation为nil，跳过处理
 		return
 	}
 	
 	// 使用defer来捕获可能的panic
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("processOperation: 发生panic: %v\n", r)
+			// processOperation: 发生panic
 			panic(r) // 重新抛出panic
 		}
 	}()
 	
-	fmt.Printf("processOperation: 处理Responses，共%d个响应\n", len(op.Responses))
-	for responseCode, ref := range op.Responses {
-		fmt.Printf("processOperation: 处理响应码 %s\n", responseCode)
+	// processOperation: 处理Responses
+	for _, ref := range op.Responses {
+		// processOperation: 处理响应码
 		if ref == nil {
-			fmt.Printf("processOperation: 响应码 %s 的ref为nil\n", responseCode)
+			// processOperation: 响应码的ref为nil
 			continue
 		}
-		fmt.Printf("processOperation: 处理响应码 %s 的Content，共%d个媒体类型\n", responseCode, len(ref.Content))
-		for mediaTypeKey, mediaType := range ref.Content {
-			fmt.Printf("processOperation: 处理媒体类型 %s\n", mediaTypeKey)
+		// processOperation: 处理响应码的Content
+		for _, mediaType := range ref.Content {
+			// processOperation: 处理媒体类型
 			if mediaType == nil {
-				fmt.Printf("processOperation: 媒体类型 %s 为nil\n", mediaTypeKey)
+				// processOperation: 媒体类型为nil
 				continue
 			}
-			fmt.Printf("processOperation: 开始处理媒体类型 %s 的Schema\n", mediaTypeKey)
+			// processOperation: 开始处理媒体类型的Schema
 			mediaType.Schema = s.processSchemaRef(mediaType.Schema)
-			fmt.Printf("processOperation: 完成处理媒体类型 %s 的Schema\n", mediaTypeKey)
+			// processOperation: 完成处理媒体类型的Schema
 		}
 	}
 	
-	fmt.Printf("processOperation: 开始处理RequestBody\n")
+	// processOperation: 开始处理RequestBody
 	requestBody := op.RequestBody
 	if requestBody != nil && requestBody.Ref == "" {
-		fmt.Printf("processOperation: RequestBody存在且无引用，处理Content\n")
+		// processOperation: RequestBody存在且无引用，处理Content
 		content := requestBody.Content
-		fmt.Printf("processOperation: RequestBody Content共%d个媒体类型\n", len(content))
-		for mediaTypeKey, mediaType := range content {
-			fmt.Printf("processOperation: 处理RequestBody媒体类型 %s\n", mediaTypeKey)
+		// processOperation: RequestBody Content
+		for _, mediaType := range content {
+			// processOperation: 处理RequestBody媒体类型
 			if mediaType == nil {
-				fmt.Printf("processOperation: RequestBody媒体类型 %s 为nil\n", mediaTypeKey)
+				// processOperation: RequestBody媒体类型为nil
 				continue
 			}
-			fmt.Printf("processOperation: 开始处理RequestBody媒体类型 %s 的Schema\n", mediaTypeKey)
+			// processOperation: 开始处理RequestBody媒体类型的Schema
 			mediaType.Schema = s.processSchemaRef(mediaType.Schema)
-			fmt.Printf("processOperation: 完成处理RequestBody媒体类型 %s 的Schema\n", mediaTypeKey)
+			// processOperation: 完成处理RequestBody媒体类型的Schema
 		}
 	} else {
-		fmt.Printf("processOperation: RequestBody为nil或有引用，跳过处理\n")
+		// processOperation: RequestBody为nil或有引用，跳过处理
 	}
 	
-	fmt.Printf("processOperation: Operation处理完成\n")
+	// processOperation: Operation处理完成
 }
 
 func (s *schemaNormalizer) process(ref *Schema, args []*Schema) *Schema {

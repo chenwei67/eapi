@@ -1,7 +1,6 @@
 package eapi
 
 import (
-	"fmt"
 	"go/ast"
 	"strings"
 
@@ -48,13 +47,13 @@ func (f *FuncDefinition) Key() string {
 				}
 				return "*" + f.pkg.PkgPath + "." + _i.Name + "." + f.Decl.Name.Name
 			default:
-				fmt.Printf("invalid function receiver at %s\n", f.pkg.Fset.Position(receiver.Pos()).String())
+				LogWarn("invalid function receiver at %s", f.pkg.Fset.Position(receiver.Pos()).String())
 			}
 		case *ast.IndexExpr:
 			// 范型未被完全支持，暂时先这样处理
 			return ""
 		default:
-			fmt.Printf("invalid function receiver at %s\n", f.pkg.Fset.Position(receiver.Pos()).String())
+			LogWarn("invalid function receiver at %s", f.pkg.Fset.Position(receiver.Pos()).String())
 		}
 	}
 

@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"go/ast"
-	"log"
 	"net/http"
 	"strings"
 
@@ -134,7 +133,7 @@ func (p *CustomRuleAnalyzer) parseDataType(call *ast.CallExpr, dataType *DataSch
 		}
 		expr, ok := output.(ast.Expr)
 		if !ok {
-			fmt.Printf("invalid data type '%s' in configuration file\n", dataType.Type)
+			analyzer.LogError("invalid data type '%s' in configuration file", dataType.Type)
 			return nil
 		}
 		return p.ctx.GetSchemaByExpr(expr, contentType)
@@ -163,14 +162,14 @@ func (p *CustomRuleAnalyzer) parseParamsInCall(call *ast.CallExpr, dataType *Dat
 		return append(params, param)
 
 	case DataTypeObject: // unsupported in form data
-		fmt.Printf("object is unsupported in form data\n")
+		analyzer.LogError("object is unsupported in form data")
 		return
 
 	default:
 		output := p.evaluate(call, string(dataType.Type))
 		expr, ok := output.(ast.Expr)
 		if !ok {
-			fmt.Printf("invalid data type '%s' in configuration file\n", dataType.Type)
+			analyzer.LogError("invalid data type '%s' in configuration file", dataType.Type)
 			return nil
 		}
 		return analyzer.NewParamParser(p.ctx, p.paramNameParser).Parse(expr)
@@ -230,12 +229,14 @@ func (p *CustomRuleAnalyzer) evaluate(call *ast.CallExpr, code string) interface
 	_ = env.Set("args", call.Args)
 	output, err := env.Run(code)
 	if err != nil {
-		log.Fatalln("evaluate failed", err)
+		analyzer.LogError("evaluate failed: %v", err)
+		panic(err)
 	}
 
 	value, err := output.Export()
 	if err != nil {
-		log.Fatalln("evaluate failed", err)
+		analyzer.LogError("evaluate failed: %v", err)
+		panic(err)
 	}
 
 	return value

@@ -1,7 +1,6 @@
 package gin
 
 import (
-	"fmt"
 	"go/ast"
 	"net/http"
 	"os"
@@ -383,7 +382,7 @@ func (p *handlerAnalyzer) parseUriFieldName(name string, field *ast.Field) strin
 // 这些方法的第二个参数指定了绑定类型
 func (p *handlerAnalyzer) parseBindWith(call *ast.CallExpr) {
 	if len(call.Args) < 2 {
-		fmt.Printf("BindWith 方法至少需要两个参数")
+		analyzer.LogWarn("BindWith 方法至少需要两个参数")
 		return
 	}
 
@@ -395,14 +394,14 @@ func (p *handlerAnalyzer) parseBindWith(call *ast.CallExpr) {
 	// 尝试从第二个参数推断内容类型
 	contentType := p.getContentTypeFromBinding(arg1)
 	if contentType == "" {
-		fmt.Printf("无法从绑定类型 %s 推断内容类型\n", arg1)
+		analyzer.LogWarn("无法从绑定类型 %s 推断内容类型", arg1)
 		os.Exit(1)
 	}
-	fmt.Printf("推断出的内容类型: %s\n", contentType)
+	analyzer.LogDebug("推断出的内容类型: %s", contentType)
 	// 使用推断出的内容类型进行绑定
 	schema := p.ctx.GetSchemaByExpr(arg0, contentType)
 	if schema == nil {
-		fmt.Printf("无法获取绑定的 schema，可能是因为表达式 %s 无法解析\n", arg0)
+		analyzer.LogWarn("无法获取绑定的 schema，可能是因为表达式 %s 无法解析", arg0)
 		os.Exit(1)
 	}
 	commentGroup := p.ctx.GetHeadingCommentOf(call.Pos())

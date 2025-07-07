@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"os"
 	"strconv"
 
 	"github.com/chenwei67/eapi/spec"
@@ -116,18 +115,18 @@ func (c *Context) ParseStatusCode(status ast.Expr) int {
 	case *ast.BasicLit:
 		code, err := strconv.ParseInt(status.Value, 10, 64)
 		if err != nil {
-			fmt.Printf("unknown status code '%s' at %s\n", status.Value, c.LineColumn(status.Pos()))
+			LogWarn("unknown status code '%s' at %s", status.Value, c.LineColumn(status.Pos()))
 			break
 		}
 		return int(code)
 
 	default:
 		// unknown status code
-		fmt.Printf("unknown status code %s\n", c.LineColumn(status.Pos()))
+		LogWarn("unknown status code %s", c.LineColumn(status.Pos()))
 	}
 
 	// unknown status code
-	fmt.Printf("unknown status code %s\n", c.LineColumn(status.Pos()))
+	LogWarn("unknown status code %s", c.LineColumn(status.Pos()))
 
 	// fallback to 200
 	return 200
@@ -182,20 +181,12 @@ func (c *Context) NewEnv() *Context {
 
 // StrictError prints red error message in strict mode, otherwise prints to stderr
 func (c *Context) StrictError(format string, args ...interface{}) {
-	if c.analyzer.strictMode {
-		fmt.Printf("\033[31m[ERROR]\033[0m "+format+"\n", args...)
-	} else {
-		fmt.Fprintf(os.Stderr, format+"\n", args...)
-	}
+	LogStrictError(format, args...)
 }
 
 // StrictWarn prints yellow warning message in strict mode, otherwise prints to stderr
 func (c *Context) StrictWarn(format string, args ...interface{}) {
-	if c.analyzer.strictMode {
-		fmt.Printf("\033[33m[WARN]\033[0m "+format+"\n", args...)
-	} else {
-		fmt.Fprintf(os.Stderr, format+"\n", args...)
-	}
+	LogStrictWarn(format, args...)
 }
 
 type CallRule struct {
