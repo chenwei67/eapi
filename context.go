@@ -180,11 +180,10 @@ func (c *Context) NewEnv() *Context {
 	return &res
 }
 
-// StrictError prints red error message in strict mode and exits, otherwise prints to stderr
+// StrictError prints red error message in strict mode, otherwise prints to stderr
 func (c *Context) StrictError(format string, args ...interface{}) {
 	if c.analyzer.strictMode {
 		fmt.Printf("\033[31m[ERROR]\033[0m "+format+"\n", args...)
-		os.Exit(1)
 	} else {
 		fmt.Fprintf(os.Stderr, format+"\n", args...)
 	}
@@ -344,5 +343,5 @@ func (c *Context) parseCallInfoByIdent(ident *ast.Ident) (info *CallInfo) {
 }
 
 func (c *Context) ParseComment(commentGroup *ast.CommentGroup) *Comment {
-	return ParseCommentWithContext(commentGroup, c.Package().Fset, c)
+	return ParseComment(commentGroup, c.Package().Fset)
 }
