@@ -24,9 +24,11 @@ go install github.com/gotomicro/eapi/cmd/eapi@latest
 ```
 
 ## 如何使用
+
 1. 创建配置文件
 
-在代码根目录创建配置文件 `eapi.yaml`: 
+在代码根目录创建配置文件 `eapi.yaml`:
+
 ```yaml
 plugin: gin # 目前支持 gin 和 echo
 output: docs
@@ -35,7 +37,8 @@ dir: .
 
 2. 生成文档
 
-在代码根目录执行命令: 
+在代码根目录执行命令:
+
 ```shell
 $ eapi
 ```
@@ -92,11 +95,13 @@ generators:
 ```
 
 ### Properties
+
 `properties` 用于配置自定义请求参数绑定函数和响应输出函数。
 
 #### 自定义请求参数绑定函数
 
 配置示例：
+
 ```yaml
 properties:
   # 自定义请求参数绑定
@@ -111,6 +116,7 @@ properties:
 #### 自定义响应输出函数
 
 配置示例：
+
 ```yaml
 response:
     - type: '*server/pkg/handler.CustomContext' # 方法所在的 package/receiver
@@ -131,6 +137,7 @@ response:
 ```
 
 其中，data type 可选值为：
+
 - string
 - number
 - integer
@@ -146,6 +153,7 @@ response:
 ### 代码生成器配置
 
 如果需要使用代码生成功能，需要在配置文件内添加如下配置:
+
 ```yaml
 # 可选
 generators:
@@ -154,24 +162,26 @@ generators:
 ```
 
 #### umi-request 请求代码生成
-   
+
    umi 代码生成器用于生成适用于使用 `umi.js` 框架的前端接口请求代码及 TypeScript 类型。
    示例配置：
-   ```yaml
+
+```yaml
    generators:
      - name: umi
        output: ./src/requests # 输出文件的目录
-   ```
-  
+```
+
 #### Typescript 类型生成
 
    ts 代码生成器用于生成 TypeScript 类型代码。
    示例配置：
-   ```yaml
+
+```yaml
    generators:
      - name: ts
        output: ./src/types # 输出文件的目录
-   ```
+```
 
 ## 注解
 
@@ -181,20 +191,21 @@ generators:
 
 如果没有写注解，eAPI 也会帮你生成关于接口的必要信息。对应关系如下：
 
-| 接口信息   | 默认值  |
-|  :-   |   :-   |
-| 接口的 summary (标题)  |  `pkg.HandlerName` handler 函数所在的包名和函数名共同组成接口标题。如果有注释，会默认使用注释作为标题 |
-| 接口描述 | handler 函数的注释（非注解部分） |
-| Path/Query/Form参数 | 根据代码生成。比如 gin 里面的 `ctx.Query("q")` 会被解析为 query 参数 q 。如果在这行代码上面加上注释，则会被作为这个参数的描述 |
-| 请求 Body | 根据代码生成。比如 gin 里面的 `ctx.Bind(&request)` 参数绑定 |
-| Model 字段描述 | 字段注释 |
-| 接口地址 | 根据代码里面的路由声明自动解析 |
+| 接口信息              | 默认值                                                                                                                          |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| 接口的 summary (标题) | `pkg.HandlerName` handler 函数所在的包名和函数名共同组成接口标题。如果有注释，会默认使用注释作为标题                          |
+| 接口描述              | handler 函数的注释（非注解部分）                                                                                                |
+| Path/Query/Form参数   | 根据代码生成。比如 gin 里面的 `ctx.Query("q")` 会被解析为 query 参数 q 。如果在这行代码上面加上注释，则会被作为这个参数的描述 |
+| 请求 Body             | 根据代码生成。比如 gin 里面的 `ctx.Bind(&request)` 参数绑定                                                                   |
+| Model 字段描述        | 字段注释                                                                                                                        |
+| 接口地址              | 根据代码里面的路由声明自动解析                                                                                                  |
 
 ### `@summary`
 
 允许写在 handler 函数的上方。用于设置接口的 `summary`（或者叫标题）。
 
 示例
+
 ```go
 // @summary 创建 XXX 资源
 func Create(c *gin.Context) {
@@ -211,6 +222,7 @@ func Create(c *gin.Context) {
 #### 示例1
 
 struct字段注释
+
 ```go
 type XxRequest struct {
   // 我是字段描述
@@ -224,6 +236,7 @@ type XxRequest struct {
 #### 示例2
 
 请求参数获取
+
 ```go
 // Create 创建 XXX 资源接口
 func Create(c *gin.Context) {
@@ -237,6 +250,7 @@ func Create(c *gin.Context) {
 ```
 
 在这个示例里面有三个参数：
+
 - categoryId Path参数 字段描述:"分类 ID" 字段必选
 - arg0 Query参数 无字段描述 必选
 - arg0 Query参数 无字段描述 非必选
@@ -246,6 +260,7 @@ func Create(c *gin.Context) {
 用于设置接口请求 body 的 content-type 。默认为 `application/json`。允许写在 handler 函数注释里面。
 
 示例
+
 ```go
 // @consume application/xml
 func Create(c *gin.Context) {
@@ -262,6 +277,7 @@ func Create(c *gin.Context) {
 用于设置接口响应 body 的 content-type 。默认为 `application/json`。允许写在 handler 函数注释里面。
 
 示例
+
 ```go
 // @produce application/xml
 func Create(c *gin.Context) {
@@ -316,6 +332,7 @@ func registerRoutes() {
 <p align="center"><img src="docs/operation-tag.jpg" width="120" /></p>
 
 示例
+
 ```go
 package router
 
@@ -363,6 +380,7 @@ func Create(c *gin.Context) {
 用于标记字段或者接口为弃用。允许用于字段注释和 handler 函数注释内。
 
 示例
+
 ```go
 type User struct {
   // Use NewField instead
@@ -388,6 +406,7 @@ func XxxHandler() {
 ```
 
 对应的 securitySchemes 配置示例:
+
 ```yaml
 openapi:
   info:
@@ -409,14 +428,24 @@ openapi:
 在上面示例中，`User.OldField` 字段会被标记为弃用，`Create` 函数对应的接口会被标记为弃用。
 
 ## 预览
+
 1. Clickvisual 项目
-  * 文档站: [https://clickvisual.gocn.vip/api](https://clickvisual.gocn.vip/api)
-  * 文档描述文件: [https://github.com/clickvisual/clickvisual/blob/master/api/docs/swagger.json](https://github.com/clickvisual/clickvisual/blob/master/api/docs/swagger.json)
+
+* 文档站: [https://clickvisual.gocn.vip/api](https://clickvisual.gocn.vip/api)
+* 文档描述文件: [https://github.com/clickvisual/clickvisual/blob/master/api/docs/swagger.json](https://github.com/clickvisual/clickvisual/blob/master/api/docs/swagger.json)
 
 2. gin 示例
-  * [配置文件](https://github.com/link-duan/eapi/blob/main/plugins/gin/testdata/server/eapi.yaml)
-  * [生成文档](https://github.com/link-duan/eapi/blob/main/plugins/gin/testdata/server/docs/openapi.json)
+
+* [配置文件](https://github.com/link-duan/eapi/blob/main/plugins/gin/testdata/server/eapi.yaml)
+* [生成文档](https://github.com/link-duan/eapi/blob/main/plugins/gin/testdata/server/docs/openapi.json)
 
 3. echo 示例
-  * [配置文件](https://github.com/link-duan/eapi/blob/main/plugins/echo/testdata/sample/eapi.yaml)
-  * [生成文档](https://github.com/link-duan/eapi/blob/main/plugins/echo/testdata/sample/docs/openapi.json)
+
+* [配置文件](https://github.com/link-duan/eapi/blob/main/plugins/echo/testdata/sample/eapi.yaml)
+* [生成文档](https://github.com/link-duan/eapi/blob/main/plugins/echo/testdata/sample/docs/openapi.json)
+
+# TODO
+
+1. 自定义响应中，函数的参数是匿名结构体，不支持，会报错unknown type(另外日志的package和file内容不对)
+2. 可不可以自动实现depends缺失就获取？免去手动输入
+3. 日志分级，Info能不能也分级？
