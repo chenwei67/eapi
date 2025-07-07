@@ -1,0 +1,8 @@
+GOCACHE=off eapi  # 临时禁用构建缓存
+go clean -cache   # 清理构建缓存
+go clean -modcache # 清理模块缓存
+
+# 使用相同的 Go 版本和环境变量
+export GOCACHE=/tmp/gocache
+export GOMODCACHE=/tmp/gomodcache
+
