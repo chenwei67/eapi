@@ -391,7 +391,14 @@ func (s *SchemaBuilder) parseType(t types.Type) *spec.SchemaRef {
 	def := s.ctx.ParseType(t)
 	typeDef, ok := def.(*TypeDefinition)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "unknown type %s\n", t.String())
+		var contextInfo string
+		if s.ctx.Package() != nil {
+			contextInfo = fmt.Sprintf(" in package %s", s.ctx.Package().Name)
+		}
+		if s.ctx.File() != nil {
+			contextInfo += fmt.Sprintf(" at file %s", s.ctx.File().Name.Name)
+		}
+		fmt.Fprintf(os.Stderr, "unknown type %s%s, def type: %T\n", t.String(), contextInfo, def)
 		return spec.NewSchema().WithExtendedType(spec.NewUnknownExtType()).NewRef()
 	}
 
