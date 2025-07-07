@@ -1,11 +1,9 @@
 package gin
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
-	"os"
 	"path"
 	"regexp"
 	"strings"

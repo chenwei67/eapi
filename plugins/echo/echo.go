@@ -118,7 +118,7 @@ func (p *Plugin) callExpr(ctx *eapi.Context, callExpr *ast.CallExpr) {
 		callExpr,
 		callRule,
 		func(call *ast.CallExpr, typeName, fnName string) {
-			comment := ParseCommentWithContext(ctx.GetHeadingCommentOf(call.Pos()), ctx.Package().Fset, ctx)
+			comment := eapi.ParseCommentWithContext(ctx.GetHeadingCommentOf(call.Pos()), ctx.Package().Fset, ctx)
 			if comment.Ignore() {
 				return
 			}
