@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"fmt"
 	"go/ast"
 	"net/http"
 	"strconv"
@@ -95,20 +96,22 @@ func (p *handlerAnalyzer) Parse() {
 			analyzer.NewCallRule().WithRule(ginContextIdentName, interestedGinContextMethods...),
 			func(call *ast.CallExpr, typeName, fnName string) {
 				switch fnName {
-				case "Bind", "ShouldBind":
+				case "Bind", "ShouldBind", "MustBind":
 					p.parseBinding(call)
-				case "BindJSON", "ShouldBindJSON":
+				case "BindJSON", "ShouldBindJSON", "MustBindJSON":
 					p.parseBindWithContentType(call, analyzer.MimeTypeJson)
-				case "BindXML", "ShouldBindXML":
+				case "BindXML", "ShouldBindXML", "MustBindXML":
 					p.parseBindWithContentType(call, analyzer.MimeApplicationXml)
-				case "BindYAML", "ShouldBindYAML":
+				case "BindYAML", "ShouldBindYAML", "MustBindYAML":
 					p.parseBindWithContentType(call, "application/yaml")
-				case "BindTOML", "ShouldBindTOML":
+				case "BindTOML", "ShouldBindTOML", "MustBindTOML":
 					p.parseBindWithContentType(call, "application/toml")
-				case "BindUri", "ShouldBindUri":
+				case "BindUri", "ShouldBindUri", "MustBindUri":
 					p.parseBindUri(call)
-				case "BindHeader", "ShouldBindHeader":
+				case "BindHeader", "ShouldBindHeader", "MustBindHeader":
 					// TODO
+				case "BindWith", "ShouldBindWith", "MustBindWith":
+					p.parseBindWith(call)
 				case "JSON":
 					p.parseResBody(call, analyzer.MimeTypeJson)
 				case "XML":
@@ -381,4 +384,80 @@ func (p *handlerAnalyzer) parseUriFieldName(name string, field *ast.Field) strin
 	}
 	res, _, _ := strings.Cut(uriTag, ",")
 	return res
+}
+
+// parseBindWith 处理 BindWith, ShouldBindWith, MustBindWith 方法
+// 这些方法的第二个参数指定了绑定类型
+func (p *handlerAnalyzer) parseBindWith(call *ast.CallExpr) {
+	if len(call.Args) < 2 {
+		fmt.Printf("BindWith 方法至少需要两个参数")
+		return
+	}
+
+	// 第一个参数是要绑定的结构体
+	arg0 := call.Args[0]
+	// 第二个参数是绑定类型
+	arg1 := call.Args[1]
+
+	// 尝试从第二个参数推断内容类型
+	contentType := p.getContentTypeFromBinding(arg1)
+	if contentType == "" {
+		// 如果无法推断，使用默认的绑定逻辑
+		p.parseBinding(call)
+		return
+	}
+
+	// 使用推断出的内容类型进行绑定
+	schema := p.ctx.GetSchemaByExpr(arg0, contentType)
+	if schema == nil {
+		return
+	}
+	commentGroup := p.ctx.GetHeadingCommentOf(call.Pos())
+	if commentGroup != nil {
+		comment := p.ctx.ParseComment(commentGroup)
+		schema.Description = comment.Text()
+	}
+	reqBody := spec.NewRequestBody().WithSchemaRef(schema, []string{contentType})
+	p.spec.RequestBody = reqBody
+}
+
+// getContentTypeFromBinding 根据绑定类型推断内容类型
+func (p *handlerAnalyzer) getContentTypeFromBinding(bindingExpr ast.Expr) string {
+	// 处理选择器表达式，如 binding.JSON
+	if sel, ok := bindingExpr.(*ast.SelectorExpr); ok {
+		switch sel.Sel.Name {
+		case "JSON":
+			return analyzer.MimeTypeJson
+		case "XML":
+			return analyzer.MimeApplicationXml
+		case "YAML":
+			return "application/yaml"
+		case "TOML":
+			return "application/toml"
+		case "Form":
+			return analyzer.MimeTypeFormData
+		case "FormPost":
+			return analyzer.MimeTypeFormData
+		case "FormMultipart":
+			return "multipart/form-data"
+		case "ProtoBuf":
+			return "application/x-protobuf"
+		case "MsgPack":
+			return "application/x-msgpack"
+		case "Query":
+			return "application/x-www-form-urlencoded"
+		case "Uri":
+			return "" // Uri 绑定不需要内容类型
+		case "Header":
+			return "" // Header 绑定不需要内容类型
+		}
+	}
+
+	// 处理标识符，如直接使用变量
+	if ident, ok := bindingExpr.(*ast.Ident); ok {
+		// 这里可以根据变量名进行推断，但通常需要更复杂的类型分析
+		_ = ident
+	}
+
+	return ""
 }
