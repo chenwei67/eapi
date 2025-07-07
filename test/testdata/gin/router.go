@@ -45,5 +45,8 @@ func ServeHttp() *gin.Engine {
 	// 测试E.Success包级别函数
 	g.GET("/test/e-success", shop.TestESuccess)
 
+	// 设置绑定方法测试路由
+	setupBindTestRoutes(r)
+
 	return r
 }

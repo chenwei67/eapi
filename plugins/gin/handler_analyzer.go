@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -20,20 +21,12 @@ const ginContextIdentName = "*github.com/gin-gonic/gin.Context"
 var (
 	interestedGinContextMethods = []string{
 		"Bind",
-		"BindWith",
 		"BindJSON",
 		"BindXML",
 		"BindYAML",
 		"BindTOML",
 		"BindUri",
 		"ShouldBind",
-		"MustBind",
-		"MustBindJSON",
-		"MustBindXML",
-		"MustBindYAML",
-		"MustBindTOML",
-		"MustBindUri",
-		"MustBindHeader",
 		"MustBindWith",
 		"ShouldBindJSON",
 		"ShouldBindXML",
@@ -96,21 +89,21 @@ func (p *handlerAnalyzer) Parse() {
 			analyzer.NewCallRule().WithRule(ginContextIdentName, interestedGinContextMethods...),
 			func(call *ast.CallExpr, typeName, fnName string) {
 				switch fnName {
-				case "Bind", "ShouldBind", "MustBind":
+				case "Bind", "ShouldBind":
 					p.parseBinding(call)
-				case "BindJSON", "ShouldBindJSON", "MustBindJSON":
+				case "BindJSON", "ShouldBindJSON":
 					p.parseBindWithContentType(call, analyzer.MimeTypeJson)
-				case "BindXML", "ShouldBindXML", "MustBindXML":
+				case "BindXML", "ShouldBindXML":
 					p.parseBindWithContentType(call, analyzer.MimeApplicationXml)
-				case "BindYAML", "ShouldBindYAML", "MustBindYAML":
+				case "BindYAML", "ShouldBindYAML":
 					p.parseBindWithContentType(call, "application/yaml")
-				case "BindTOML", "ShouldBindTOML", "MustBindTOML":
+				case "BindTOML", "ShouldBindTOML":
 					p.parseBindWithContentType(call, "application/toml")
-				case "BindUri", "ShouldBindUri", "MustBindUri":
+				case "BindUri", "ShouldBindUri":
 					p.parseBindUri(call)
-				case "BindHeader", "ShouldBindHeader", "MustBindHeader":
+				case "BindHeader", "ShouldBindHeader":
 					// TODO
-				case "BindWith", "ShouldBindWith", "MustBindWith":
+				case "ShouldBindWith", "MustBindWith":
 					p.parseBindWith(call)
 				case "JSON":
 					p.parseResBody(call, analyzer.MimeTypeJson)
@@ -402,15 +395,15 @@ func (p *handlerAnalyzer) parseBindWith(call *ast.CallExpr) {
 	// 尝试从第二个参数推断内容类型
 	contentType := p.getContentTypeFromBinding(arg1)
 	if contentType == "" {
-		// 如果无法推断，使用默认的绑定逻辑
-		p.parseBinding(call)
-		return
+		fmt.Printf("无法从绑定类型 %s 推断内容类型\n", arg1)
+		os.Exit(1)
 	}
-
+	fmt.Printf("推断出的内容类型: %s\n", contentType)
 	// 使用推断出的内容类型进行绑定
 	schema := p.ctx.GetSchemaByExpr(arg0, contentType)
 	if schema == nil {
-		return
+		fmt.Printf("无法获取绑定的 schema，可能是因为表达式 %s 无法解析\n", arg0)
+		os.Exit(1)
 	}
 	commentGroup := p.ctx.GetHeadingCommentOf(call.Pos())
 	if commentGroup != nil {
