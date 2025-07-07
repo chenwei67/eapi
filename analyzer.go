@@ -1,13 +1,10 @@
 package eapi
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
-	"go/build"
 	"go/token"
 	"go/types"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -180,31 +177,6 @@ func (a *Analyzer) load(pkgPath string) [][]*packages.Package {
 		}
 	}()
 
-	var pkgList []*build.Package
-	fmt.Printf("load: 开始遍历目录\n")
-	filepath.Walk(absPath, func(path string, info fs.FileInfo, err error) error {
-		fmt.Printf("load: 检查路径 %s\n", path)
-		if !info.IsDir() {
-			fmt.Printf("load: 跳过文件 %s\n", path)
-			return nil
-		}
-		fmt.Printf("load: 尝试导入目录 %s\n", path)
-		pkg, err := build.Default.ImportDir(path, build.ImportComment)
-		if err != nil {
-			var noGoErr = &build.NoGoError{}
-			if errors.As(err, &noGoErr) {
-				fmt.Printf("load: 目录无Go文件，跳过 %s\n", path)
-				return nil
-			}
-			fmt.Printf("load: 导入目录失败 %s: %v\n", path, err)
-			panic("import directory failed: " + err.Error())
-		}
-		fmt.Printf("load: 成功导入包 %s (路径: %s)\n", pkg.Name, path)
-		pkgList = append(pkgList, pkg)
-		return filepath.SkipDir
-	})
-	fmt.Printf("load: 目录遍历完成，找到%d个包\n", len(pkgList))
-
 	fmt.Printf("load: 创建packages.Config\n")
 	config := &packages.Config{
 		Mode: packages.NeedName |
@@ -218,40 +190,37 @@ func (a *Analyzer) load(pkgPath string) [][]*packages.Package {
 		BuildFlags: []string{},
 		Tests:      false,
 		Dir:        absPath,
-		Env:        append(os.Environ(), "GOCACHE=off"),
+		Env:        os.Environ(),
 	}
 	fmt.Printf("load: packages.Config创建完成\n")
 
-	var res [][]*packages.Package
-	fmt.Printf("load: 开始处理%d个包\n", len(pkgList))
-	for pkgIdx, pkg := range pkgList {
-		fmt.Printf("load: 处理第%d个包: %s (目录: %s)\n", pkgIdx+1, pkg.Name, pkg.Dir)
-		var files []string
-		for _, filename := range append(pkg.GoFiles, pkg.CgoFiles...) {
-			filePath := filepath.Join(pkg.Dir, filename)
-			files = append(files, filePath)
-			fmt.Printf("load: 添加文件: %s\n", filePath)
+	// 使用 ./... 模式加载当前目录及所有子目录的包
+	fmt.Printf("load: 使用./...模式调用packages.Load\n")
+	packs, err := packages.Load(config, "./...")
+	if err != nil {
+		fmt.Printf("load: packages.Load失败: %v\n", err)
+		panic("load packages failed: " + err.Error())
+	}
+	fmt.Printf("load: packages.Load成功，返回%d个包\n", len(packs))
+
+	// 打印每个包的详细信息用于调试
+	for i, p := range packs {
+		fmt.Printf("load: 包%d - ID: %s, PkgPath: %s, Name: %s\n", i+1, p.ID, p.PkgPath, p.Name)
+		if p.Module != nil {
+			fmt.Printf("load: 包%d - Module: %s (Dir: %s)\n", i+1, p.Module.Path, p.Module.Dir)
+		} else {
+			fmt.Printf("load: 包%d - 无Module信息\n", i+1)
 		}
-		fmt.Printf("load: 包%s共有%d个文件，开始调用packages.Load\n", pkg.Name, len(files))
-
-		packs, err := packages.Load(config, files...)
-		if err != nil {
-			fmt.Printf("load: packages.Load失败: %v\n", err)
-			panic("load packages failed: " + err.Error())
+		fmt.Printf("load: 包%d - 语法文件数: %d\n", i+1, len(p.Syntax))
+		if len(p.Errors) > 0 {
+			fmt.Printf("load: 包%d - 错误: %v\n", i+1, p.Errors)
 		}
-		fmt.Printf("load: packages.Load成功，返回%d个包\n", len(packs))
+	}
 
-		// 前面的 packages.Load() 方法不能解析出以第一层的 Module
-		// 所以这里手动解析 go.mod
-		fmt.Printf("load: 开始处理Module信息\n")
-		for packIdx, p := range packs {
-			fmt.Printf("load: 检查第%d个包的Module: %s\n", packIdx+1, p.PkgPath)
-			if p.Module != nil {
-				fmt.Printf("load: 包%s已有Module，跳过\n", p.PkgPath)
-				continue
-			}
-
-			fmt.Printf("load: 包%s无Module，开始解析go.mod\n", p.PkgPath)
+	// 对于主包（command-line-arguments），手动设置Module信息
+	for _, p := range packs {
+		if p.PkgPath == entryPackageName && p.Module == nil {
+			fmt.Printf("load: 为主包设置Module信息\n")
 			module := a.parseGoModule(pkgPath)
 			if module == nil {
 				fmt.Printf("load: 解析go.mod失败\n")
@@ -259,16 +228,13 @@ func (a *Analyzer) load(pkgPath string) [][]*packages.Package {
 			}
 			fmt.Printf("load: 解析go.mod成功，模块路径: %s\n", module.Path)
 			p.Module = module
-			p.PkgPath = entryPackageName
 			p.ID = module.Path
-			fmt.Printf("load: 包%s的Module信息设置完成\n", p.PkgPath)
+			fmt.Printf("load: 主包Module信息设置完成\n")
 		}
-		fmt.Printf("load: 第%d个包处理完成\n", pkgIdx+1)
-		res = append(res, packs)
 	}
 
-	fmt.Printf("load: 所有包处理完成，返回%d个包组\n", len(res))
-	return res
+	fmt.Printf("load: 包加载完成，返回包组\n")
+	return [][]*packages.Package{packs}
 }
 
 func (a *Analyzer) processFile(ctx *Context, file *ast.File, pkg *packages.Package) {
