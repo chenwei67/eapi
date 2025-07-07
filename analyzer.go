@@ -218,6 +218,7 @@ func (a *Analyzer) load(pkgPath string) [][]*packages.Package {
 		BuildFlags: []string{},
 		Tests:      false,
 		Dir:        absPath,
+		Env:        append(os.Environ(), "GOCACHE=off"),
 	}
 	fmt.Printf("load: packages.Config创建完成\n")
 
