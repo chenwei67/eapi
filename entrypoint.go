@@ -16,11 +16,12 @@ import (
 )
 
 type Config struct {
-	Plugin  string
-	Dir     string
-	Output  string
-	Depends []string
-	OpenAPI OpenAPIConfig
+	Plugin     string
+	Dir        string
+	Output     string
+	Depends    []string
+	StrictMode bool
+	OpenAPI    OpenAPIConfig
 
 	Generators []*GeneratorConfig
 }
@@ -133,6 +134,12 @@ func (e *Entrypoint) Run(args []string) {
 		Usage:    "configuration file",
 		Required: false,
 	})
+	app.Flags = append(app.Flags, &cli.BoolFlag{
+		Name:        "strict",
+		Aliases:     []string{"s"},
+		Usage:       "enable strict mode - show red error logs instead of skipping issues",
+		Destination: &e.cfg.StrictMode,
+	})
 
 	app.Commands = append(app.Commands, showVersion())
 
@@ -212,7 +219,10 @@ func (e *Entrypoint) run(c *cli.Context) error {
 		return err
 	}
 	fmt.Printf("output directory: %s\n", e.cfg.Output)
-	a := NewAnalyzer(e.k).Plugin(plugin).Depends(e.cfg.Depends...)
+	if e.cfg.StrictMode {
+		fmt.Printf("\033[33m[STRICT MODE]\033[0m Enabled - errors will be reported instead of skipped\n")
+	}
+	a := NewAnalyzer(e.k).Plugin(plugin).Depends(e.cfg.Depends...).WithStrictMode(e.cfg.StrictMode)
 	fmt.Printf("doc0: 开始处理文档\n")
 	
 	// 获取原始文档
@@ -253,6 +263,7 @@ func (e *Entrypoint) run(c *cli.Context) error {
 				}
 				return val
 			},
+			e.cfg.StrictMode,
 		).execute()
 		if err != nil {
 			return err

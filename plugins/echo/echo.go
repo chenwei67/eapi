@@ -1,11 +1,9 @@
 package echo
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
-	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -120,7 +118,7 @@ func (p *Plugin) callExpr(ctx *eapi.Context, callExpr *ast.CallExpr) {
 		callExpr,
 		callRule,
 		func(call *ast.CallExpr, typeName, fnName string) {
-			comment := ctx.ParseComment(ctx.GetHeadingCommentOf(call.Pos()))
+			comment := ParseCommentWithContext(ctx.GetHeadingCommentOf(call.Pos()), ctx.Package().Fset, ctx)
 			if comment.Ignore() {
 				return
 			}
@@ -158,7 +156,7 @@ func (p *Plugin) parseAPI(ctx *eapi.Context, callExpr *ast.CallExpr, comment *ea
 	typeName, methodName := utils.GetFuncInfo(handlerFn)
 	handlerDef := ctx.GetDefinition(typeName, methodName)
 	if handlerDef == nil {
-		fmt.Fprintf(os.Stderr, "handler function %s.%s not found\n", typeName, methodName)
+		ctx.StrictError("handler function %s.%s not found", typeName, methodName)
 		return
 	}
 	handlerFnDef, ok := handlerDef.(*eapi.FuncDefinition)

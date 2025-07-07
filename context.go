@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"os"
 	"strconv"
 
 	"github.com/chenwei67/eapi/spec"
@@ -177,6 +178,24 @@ func (c *Context) NewEnv() *Context {
 	res := *c
 	res.Env = NewEnvironment(nil)
 	return &res
+}
+
+// StrictError prints red error message in strict mode, otherwise prints to stderr
+func (c *Context) StrictError(format string, args ...interface{}) {
+	if c.analyzer.strictMode {
+		fmt.Printf("\033[31m[ERROR]\033[0m "+format+"\n", args...)
+	} else {
+		fmt.Fprintf(os.Stderr, format+"\n", args...)
+	}
+}
+
+// StrictWarn prints yellow warning message in strict mode, otherwise prints to stderr
+func (c *Context) StrictWarn(format string, args ...interface{}) {
+	if c.analyzer.strictMode {
+		fmt.Printf("\033[33m[WARN]\033[0m "+format+"\n", args...)
+	} else {
+		fmt.Fprintf(os.Stderr, format+"\n", args...)
+	}
 }
 
 type CallRule struct {

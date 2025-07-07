@@ -10,13 +10,14 @@ import (
 )
 
 type generatorExecutor struct {
-	cfg       *GeneratorConfig
-	doc       *spec.T
-	getConfig func(key string) interface{}
+	cfg        *GeneratorConfig
+	doc        *spec.T
+	getConfig  func(key string) interface{}
+	strictMode bool
 }
 
-func newGeneratorExecutor(cfg *GeneratorConfig, doc *spec.T, getConfig func(key string) interface{}) *generatorExecutor {
-	return &generatorExecutor{cfg: cfg, doc: doc, getConfig: getConfig}
+func newGeneratorExecutor(cfg *GeneratorConfig, doc *spec.T, getConfig func(key string) interface{}, strictMode bool) *generatorExecutor {
+	return &generatorExecutor{cfg: cfg, doc: doc, getConfig: getConfig, strictMode: strictMode}
 }
 
 func (r *generatorExecutor) execute() (err error) {
@@ -44,7 +45,18 @@ func (r *generatorExecutor) execute() (err error) {
 }
 
 func (r *generatorExecutor) generate(t *generators.Generator) error {
-	result := t.Print(r.doc, &generators.PrintOptions{GetConfig: r.getConfig})
+	errorLogger := func(format string, args ...interface{}) {
+		if r.strictMode {
+			fmt.Printf("\033[31m[ERROR]\033[0m "+format+"\n", args...)
+		} else {
+			fmt.Fprintf(os.Stderr, format+"\n", args...)
+		}
+	}
+	result := t.Print(r.doc, &generators.PrintOptions{
+		GetConfig:   r.getConfig,
+		StrictMode:  r.strictMode,
+		ErrorLogger: errorLogger,
+	})
 	for _, item := range result {
 		outputFile := filepath.Join(r.cfg.Output, item.FileName)
 		dir := filepath.Dir(outputFile)

@@ -222,7 +222,7 @@ func (s *SchemaBuilder) parseStruct(expr *ast.StructType) *spec.SchemaRef {
 			}
 			fieldSchema := s.ParseExpr(field.Type)
 			if fieldSchema == nil {
-				fmt.Printf("unknown field type %s at %s\n", name.Name, s.ctx.LineColumn(field.Type.Pos()))
+				s.ctx.StrictWarn("unknown field type %s at %s", name.Name, s.ctx.LineColumn(field.Type.Pos()))
 				continue
 			}
 			propName := s.getPropName(name.Name, field, contentType)
@@ -398,7 +398,7 @@ func (s *SchemaBuilder) parseType(t types.Type) *spec.SchemaRef {
 		if s.ctx.File() != nil {
 			contextInfo += fmt.Sprintf(" at file %s", s.ctx.File().Name.Name)
 		}
-		fmt.Fprintf(os.Stderr, "unknown type %s%s, def type: %T\n", t.String(), contextInfo, def)
+		s.ctx.StrictError("unknown type %s%s, def type: %T", t.String(), contextInfo, def)
 		return spec.NewSchema().WithExtendedType(spec.NewUnknownExtType()).NewRef()
 	}
 
@@ -430,12 +430,12 @@ func (s *SchemaBuilder) parseType(t types.Type) *spec.SchemaRef {
 func (s *SchemaBuilder) parseCommentOfField(field *ast.Field) *Comment {
 	// heading comment
 	if field.Doc != nil && len(field.Doc.List) > 0 {
-		return s.ctx.ParseComment(field.Doc)
+		return ParseCommentWithContext(field.Doc, s.ctx.Package().Fset, s.ctx)
 	}
 
 	// parse trailing comment
 	commentGroup := s.ctx.GetTrailingCommentOf(field.Pos())
-	return s.ctx.ParseComment(commentGroup)
+	return ParseCommentWithContext(commentGroup, s.ctx.Package().Fset, s.ctx)
 }
 
 func (s *SchemaBuilder) parseCallExpr(expr *ast.CallExpr) *spec.SchemaRef {
@@ -487,7 +487,7 @@ func (s *SchemaBuilder) getTypeKey(expr ast.Expr) string {
 	default:
 		def := s.ctx.ParseType(t)
 		if def == nil {
-			fmt.Printf("unknown type at %s\n", s.ctx.LineColumn(expr.Pos()))
+			s.ctx.StrictWarn("unknown type at %s", s.ctx.LineColumn(expr.Pos()))
 			return ""
 		}
 		return def.(*TypeDefinition).ModelKey()

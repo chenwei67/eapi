@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	analyzer "github.com/chenwei67/eapi"
+	"github.com/chenwei67/eapi"
 	"github.com/chenwei67/eapi/plugins/common"
 	"github.com/chenwei67/eapi/spec"
 	"github.com/iancoleman/strcase"
@@ -20,15 +20,15 @@ var (
 )
 
 type handlerAnalyzer struct {
-	ctx  *analyzer.Context
-	api  *analyzer.API
-	spec *analyzer.APISpec
+	ctx  *eapi.Context
+	api  *eapi.API
+	spec *eapi.APISpec
 	decl *ast.FuncDecl
 
 	c *common.Config
 }
 
-func newHandlerAnalyzer(ctx *analyzer.Context, api *analyzer.API, decl *ast.FuncDecl) *handlerAnalyzer {
+func newHandlerAnalyzer(ctx *eapi.Context, api *eapi.API, decl *ast.FuncDecl) *handlerAnalyzer {
 	return &handlerAnalyzer{ctx: ctx, api: api, spec: api.Spec, decl: decl}
 }
 
@@ -55,7 +55,7 @@ func (p *handlerAnalyzer) Parse() {
 		}
 
 		p.ctx.MatchCall(node,
-			analyzer.NewCallRule().WithRule(echoContextIdentName, interestedEchoContextMethods...),
+			eapi.NewCallRule().WithRule(echoContextIdentName, interestedEchoContextMethods...),
 			func(call *ast.CallExpr, typeName, fnName string) {
 				switch fnName {
 				case "Bind":
@@ -100,7 +100,7 @@ func (p *handlerAnalyzer) parseBinding(call *ast.CallExpr) {
 
 	switch p.api.Method {
 	case http.MethodGet, http.MethodHead, http.MethodOptions, http.MethodDelete:
-		params := analyzer.NewParamParser(p.ctx, p.paramNameParser).Parse(arg0)
+		params := eapi.NewParamParser(p.ctx, p.paramNameParser).Parse(arg0)
 		for _, param := range params {
 			p.spec.AddParameter(param)
 		}
@@ -112,7 +112,7 @@ func (p *handlerAnalyzer) parseBinding(call *ast.CallExpr) {
 		}
 		commentGroup := p.ctx.GetHeadingCommentOf(call.Pos())
 		if commentGroup != nil {
-			comment := p.ctx.ParseComment(commentGroup)
+			comment := eapi.ParseCommentWithContext(commentGroup, p.ctx.Package().Fset, p.ctx)
 			schema.Description = comment.Text()
 		}
 		reqBody := spec.NewRequestBody().WithSchemaRef(schema, []string{contentType})
@@ -128,7 +128,7 @@ func (p *handlerAnalyzer) parseResBody(call *ast.CallExpr, contentType string) {
 	res := spec.NewResponse()
 	commentGroup := p.ctx.GetHeadingCommentOf(call.Pos())
 	if commentGroup != nil {
-		comment := p.ctx.ParseComment(commentGroup)
+		comment := eapi.ParseCommentWithContext(commentGroup, p.ctx.Package().Fset, p.ctx)
 		if comment != nil {
 			desc := comment.Text()
 			res.Description = &desc
@@ -149,7 +149,7 @@ func (p *handlerAnalyzer) parseRedirectRes(call *ast.CallExpr) {
 	res := spec.NewResponse()
 	commentGroup := p.ctx.GetHeadingCommentOf(call.Pos())
 	if commentGroup != nil {
-		comment := p.ctx.ParseComment(commentGroup)
+		comment := eapi.ParseCommentWithContext(commentGroup, p.ctx.Package().Fset, p.ctx)
 		if comment != nil {
 			desc := comment.Text()
 			res.Description = &desc
@@ -187,13 +187,13 @@ func (p *handlerAnalyzer) parseFormData(call *ast.CallExpr, fieldType string, op
 		requestBody = spec.NewRequestBody().WithContent(spec.NewContent())
 		p.spec.RequestBody = requestBody
 	}
-	mediaType := requestBody.GetMediaType(analyzer.MimeTypeFormData)
+	mediaType := requestBody.GetMediaType(eapi.MimeTypeFormData)
 	if mediaType == nil {
 		mediaType = spec.NewMediaType()
-		requestBody.Content[analyzer.MimeTypeFormData] = mediaType
+		requestBody.Content[eapi.MimeTypeFormData] = mediaType
 	}
 
-	comment := p.ctx.ParseComment(p.ctx.GetHeadingCommentOf(call.Pos()))
+	comment := eapi.ParseCommentWithContext(p.ctx.GetHeadingCommentOf(call.Pos()), p.ctx.Package().Fset, p.ctx)
 	paramSchema.Description = comment.Text()
 
 	var schemaRef = mediaType.Schema
@@ -237,7 +237,7 @@ func (p *handlerAnalyzer) primitiveParam(call *ast.CallExpr, in string) *spec.Pa
 		res = spec.NewQueryParameter(name).WithSchema(paramSchema)
 	}
 
-	comment := p.ctx.ParseComment(p.ctx.GetHeadingCommentOf(call.Pos()))
+	comment := eapi.ParseCommentWithContext(p.ctx.GetHeadingCommentOf(call.Pos()), p.ctx.Package().Fset, p.ctx)
 	res.Description = comment.Text()
 
 	return res
@@ -286,8 +286,8 @@ func (p *handlerAnalyzer) getDefaultContentType() string {
 	// fallback
 	switch p.api.Method {
 	case http.MethodGet, http.MethodHead:
-		return analyzer.MimeTypeFormData
+		return eapi.MimeTypeFormData
 	default:
-		return analyzer.MimeTypeJson
+		return eapi.MimeTypeJson
 	}
 }

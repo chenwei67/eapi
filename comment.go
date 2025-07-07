@@ -181,6 +181,10 @@ func convertSecAnnotationToSecurityRequirements(annotations []annotation.Annotat
 }
 
 func ParseComment(commentGroup *ast.CommentGroup, fSet *token.FileSet) *Comment {
+	return ParseCommentWithContext(commentGroup, fSet, nil)
+}
+
+func ParseCommentWithContext(commentGroup *ast.CommentGroup, fSet *token.FileSet, ctx *Context) *Comment {
 	if commentGroup == nil {
 		return nil
 	}
@@ -191,7 +195,12 @@ func ParseComment(commentGroup *ast.CommentGroup, fSet *token.FileSet) *Comment 
 		annot, err := annotation.NewParser(comment.Text).Parse()
 		if err != nil {
 			err := err.(*annotation.ParseError)
-			fmt.Fprintf(os.Stderr, "[Invalid Annotation]: %s at %s\n", err, fSet.Position(comment.Pos()+token.Pos(err.Column)).String())
+			errorMsg := fmt.Sprintf("[Invalid Annotation]: %s at %s", err, fSet.Position(comment.Pos()+token.Pos(err.Column)).String())
+			if ctx != nil {
+				ctx.StrictError(errorMsg)
+			} else {
+				fmt.Fprintf(os.Stderr, errorMsg+"\n")
+			}
 			continue
 		}
 		if annot != nil {

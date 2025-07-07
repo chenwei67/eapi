@@ -23,6 +23,7 @@ type Analyzer struct {
 	definitions Definitions
 	depends     []string
 	k           *koanf.Koanf
+	strictMode  bool
 
 	doc      *spec.T
 	packages []*packages.Package
@@ -64,6 +65,11 @@ func (a *Analyzer) Plugin(plugins ...Plugin) *Analyzer {
 
 func (a *Analyzer) Depends(pkgNames ...string) *Analyzer {
 	a.depends = append(a.depends, pkgNames...)
+	return a
+}
+
+func (a *Analyzer) WithStrictMode(strict bool) *Analyzer {
+	a.strictMode = strict
 	return a
 }
 

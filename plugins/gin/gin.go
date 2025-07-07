@@ -133,7 +133,7 @@ func (e *Plugin) callExpr(ctx *analyzer.Context, callExpr *ast.CallExpr) {
 		callExpr,
 		callRule,
 		func(call *ast.CallExpr, typeName, fnName string) {
-			comment := ctx.ParseComment(ctx.GetHeadingCommentOf(call.Pos()))
+			comment := analyzer.ParseCommentWithContext(ctx.GetHeadingCommentOf(call.Pos()), ctx.Package().Fset, ctx)
 			if comment.Ignore() {
 				return
 			}
@@ -171,7 +171,7 @@ func (e *Plugin) parseAPI(ctx *analyzer.Context, callExpr *ast.CallExpr, comment
 	typeName, methodName := utils.GetFuncInfo(handlerFn)
 	handlerDef := ctx.GetDefinition(typeName, methodName)
 	if handlerDef == nil {
-		fmt.Fprintf(os.Stderr, "handler function %s.%s not found\n", typeName, methodName)
+		ctx.StrictError("handler function %s.%s not found", typeName, methodName)
 		return
 	}
 	handlerFnDef, ok := handlerDef.(*analyzer.FuncDefinition)
