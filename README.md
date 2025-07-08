@@ -449,3 +449,4 @@ openapi:
 1. 自定义响应中，函数的参数是匿名结构体，不支持，会报错unknown type(另外日志的package和file内容不对)
 2. 可不可以自动实现depends缺失就获取？免去手动输入
 3. 日志分级，Info能不能也分级？
+4. depends配置的有时候仍然不生效

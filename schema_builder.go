@@ -393,7 +393,7 @@ func (s *SchemaBuilder) parseType(t types.Type) *spec.SchemaRef {
 	if !ok {
 		var contextInfo string
 		if s.ctx.Package() != nil {
-			contextInfo = fmt.Sprintf(" in package %s", s.ctx.Package().Name)
+			contextInfo = fmt.Sprintf(" in package %s", s.ctx.Package().PkgPath)
 		}
 		if s.ctx.File() != nil {
 			contextInfo += fmt.Sprintf(" at file %s", s.ctx.File().Name.Name)
