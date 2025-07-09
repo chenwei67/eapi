@@ -34,6 +34,7 @@ var (
 		"ShouldBindUri",
 		"ShouldBindHeader",
 		"ShouldBindWith",
+		"ShouldBindQuery",
 		"JSON",
 		"Query",
 		"Param",
@@ -108,7 +109,7 @@ func (p *handlerAnalyzer) Parse() {
 					p.parseResBody(call, analyzer.MimeTypeJson)
 				case "XML":
 					p.parseResBody(call, analyzer.MimeApplicationXml)
-				case "Query": // query parameter
+				case "Query", "ShouldBindQuery": // query parameter
 					p.parsePrimitiveParam(call, "query")
 				case "Param": // path parameter
 					p.parsePrimitiveParam(call, "path")
