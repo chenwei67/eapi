@@ -1,70 +1,6 @@
 {
     "components": {
         "schemas": {
-            "CustomResponseType1[server_pkg_view.GoodsInfoRes]": {
-                "properties": {
-                    "code": {
-                        "type": "number"
-                    },
-                    "data": {
-                        "$ref": "#/components/schemas/server_pkg_view.GoodsInfoRes"
-                    },
-                    "msg": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "code",
-                    "data",
-                    "msg"
-                ],
-                "title": "CustomResponseType1",
-                "type": "object"
-            },
-            "CustomResponseType[b76073db434d]": {
-                "properties": {
-                    "code": {
-                        "type": "number"
-                    },
-                    "data": {
-                        "additionalProperties": {
-                            "description": "Any Type",
-                            "type": "object"
-                        },
-                        "type": "object"
-                    },
-                    "msg": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "code",
-                    "data",
-                    "msg"
-                ],
-                "title": "CustomResponseType",
-                "type": "object"
-            },
-            "CustomResponseType[server_pkg_view.GoodsCreateRes]": {
-                "properties": {
-                    "code": {
-                        "type": "number"
-                    },
-                    "data": {
-                        "$ref": "#/components/schemas/server_pkg_view.GoodsCreateRes"
-                    },
-                    "msg": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "code",
-                    "data",
-                    "msg"
-                ],
-                "title": "CustomResponseType",
-                "type": "object"
-            },
             "ShopGoodsDownRequest": {
                 "properties": {
                     "dateRange": {
@@ -89,31 +25,47 @@
                 "title": "ShopGoodsDownRequest",
                 "type": "object"
             },
-            "github.com_gin-gonic_gin.Param": {
-                "description": "Param is a single URL parameter, consisting of a key and a value.",
+            "server.QueryRequest": {
+                "description": "QueryRequest 查询请求结构体",
                 "properties": {
-                    "Key": {
+                    "active": {
+                        "description": "是否激活",
+                        "type": "boolean"
+                    },
+                    "age": {
+                        "description": "年龄",
+                        "type": "integer"
+                    },
+                    "email": {
+                        "description": "邮箱",
                         "type": "string"
                     },
-                    "Value": {
+                    "tags": {
+                        "description": "标签列表",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "username": {
+                        "description": "用户名 @required",
                         "type": "string"
                     }
                 },
-                "title": "GinParam",
+                "title": "RouterQueryRequest",
                 "type": "object"
             },
-            "github.com_gin-gonic_gin.Params": {
-                "description": "Params is a Param-slice, as returned by the router.\n\nThe slice is ordered, the first URL parameter is also the first slice value.\n\nIt is therefore safe to read values by the index.",
-                "items": {
-                    "$ref": "#/components/schemas/github.com_gin-gonic_gin.Param"
+            "server.TestRequest": {
+                "properties": {
+                    "age": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
                 },
-                "title": "GinParams",
-                "type": "array"
-            },
-            "gorm.io_gorm.DeletedAt": {
-                "format": "date-time",
-                "title": "GormDeletedAt",
-                "type": "string"
+                "title": "RouterTestRequest",
+                "type": "object"
             },
             "server_pkg_shop.GoodsInfoPathParams": {
                 "properties": {
@@ -148,66 +100,6 @@
                 "title": "ViewError",
                 "type": "object"
             },
-            "server_pkg_view.GoodsCreateReq": {
-                "properties": {
-                    "cover": {
-                        "description": "封面图",
-                        "type": "string"
-                    },
-                    "images": {
-                        "description": "详情图",
-                        "items": {
-                            "$ref": "#/components/schemas/server_pkg_view.Image"
-                        },
-                        "type": "array"
-                    },
-                    "price": {
-                        "description": "价格(分)",
-                        "type": "integer"
-                    },
-                    "subTitle": {
-                        "description": "商品描述",
-                        "type": "string"
-                    },
-                    "title": {
-                        "description": "商品标题",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "title",
-                    "price"
-                ],
-                "title": "ViewGoodsCreateReq",
-                "type": "object"
-            },
-            "server_pkg_view.GoodsCreateRes": {
-                "properties": {
-                    "Status": {
-                        "description": "测试引用第三方包",
-                        "$ref": "#/components/schemas/github.com_gin-gonic_gin.Params"
-                    },
-                    "guid": {
-                        "description": "商品 GUID",
-                        "type": "string"
-                    },
-                    "raw": {
-                        "deprecated": true,
-                        "description": "测试引用内置包类型",
-                        "type": "object"
-                    },
-                    "selfRef": {
-                        "description": "测试循环引用",
-                        "$ref": "#/components/schemas/server_pkg_view.SelfRefType"
-                    },
-                    "stringAlias": {
-                        "description": "测试类型别名",
-                        "type": "string"
-                    }
-                },
-                "title": "ViewGoodsCreateRes",
-                "type": "object"
-            },
             "server_pkg_view.GoodsDownRes": {
                 "properties": {
                     "Status": {
@@ -222,9 +114,7 @@
                     "cover": {
                         "type": "string"
                     },
-                    "deletedAt": {
-                        "$ref": "#/components/schemas/gorm.io_gorm.DeletedAt"
-                    },
+                    "deletedAt": {},
                     "mapInt": {
                         "additionalProperties": {
                             "$ref": "#/components/schemas/server_pkg_view.Property"
@@ -250,20 +140,6 @@
                 "title": "ViewGoodsInfoRes",
                 "type": "object"
             },
-            "server_pkg_view.Image": {
-                "description": "Image 商品图片",
-                "properties": {
-                    "url": {
-                        "description": "图片链接",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "url"
-                ],
-                "title": "ViewImage",
-                "type": "object"
-            },
             "server_pkg_view.Property": {
                 "properties": {
                     "title": {
@@ -272,41 +148,14 @@
                 },
                 "title": "ViewProperty",
                 "type": "object"
-            },
-            "server_pkg_view.SelfRefType": {
-                "properties": {
-                    "data": {
-                        "type": "string"
-                    },
-                    "parent": {
-                        "$ref": "#/components/schemas/server_pkg_view.SelfRefType"
-                    }
-                },
-                "title": "ViewSelfRefType",
-                "type": "object"
-            }
-        },
-        "securitySchemes": {
-            "oauth2": {
-                "flows": {
-                    "implicit": {
-                        "authorizationUrl": "https://example.org/api/oauth/dialog",
-                        "scopes": {
-                            "goods:write": "modify pets in your account",
-                            "read:pets": "read your pets"
-                        }
-                    }
-                },
-                "type": "oauth2"
             }
         }
     },
     "info": {
-        "description": "Example description for Example",
-        "title": "This is an Example",
+        "title": "",
         "version": ""
     },
-    "openapi": "3.1.0",
+    "openapi": "3.0.3",
     "paths": {
         "/api/controller/goods/{guid}": {
             "delete": {
@@ -333,27 +182,7 @@
             "post": {
                 "description": "GoodsCreate 创建商品接口",
                 "operationId": "shop.GoodsCreate",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/server_pkg_view.GoodsCreateReq"
-                            }
-                        }
-                    },
-                    "required": true
-                },
                 "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CustomResponseType[server_pkg_view.GoodsCreateRes]"
-                                }
-                            }
-                        },
-                        "description": "创建成功"
-                    },
                     "400": {
                         "content": {
                             "application/json": {
@@ -383,15 +212,6 @@
             "delete": {
                 "description": "GoodsDelete 删除商品",
                 "operationId": "shop.GoodsDelete",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "formDataField",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
                 "responses": {},
                 "security": [
                     {
@@ -473,7 +293,11 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CustomResponseType1[server_pkg_view.GoodsInfoRes]"
+                                    "additionalProperties": {
+                                        "description": "Any Type",
+                                        "type": "object"
+                                    },
+                                    "type": "object"
                                 }
                             }
                         },
@@ -525,6 +349,395 @@
                 ]
             }
         },
+        "/test/bind-query": {
+            "get": {
+                "description": " 使用BindQuery绑定查询参数",
+                "operationId": "router.TestBindQuery",
+                "parameters": [
+                    {
+                        "description": "用户名 @required",
+                        "in": "query",
+                        "name": "username",
+                        "schema": {
+                            "description": "用户名 @required",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "年龄",
+                        "in": "query",
+                        "name": "age",
+                        "schema": {
+                            "description": "年龄",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "邮箱",
+                        "in": "query",
+                        "name": "email",
+                        "schema": {
+                            "description": "邮箱",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "是否激活",
+                        "in": "query",
+                        "name": "active",
+                        "schema": {
+                            "description": "是否激活",
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "标签列表",
+                        "in": "query",
+                        "name": "tags",
+                        "schema": {
+                            "description": "标签列表",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "summary": "测试BindQuery方法",
+                "tags": [
+                    "query"
+                ]
+            }
+        },
+        "/test/bindwith": {
+            "post": {
+                "description": "TestBindWith 测试 BindWith 方法",
+                "operationId": "router.TestBindWith",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/test/mixed-query-binding": {
+            "get": {
+                "description": " 同时使用多种查询绑定方法",
+                "operationId": "router.TestMixedQueryBinding",
+                "parameters": [
+                    {
+                        "description": "用户名 @required",
+                        "in": "query",
+                        "name": "username",
+                        "schema": {
+                            "description": "用户名 @required",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "年龄",
+                        "in": "query",
+                        "name": "age",
+                        "schema": {
+                            "description": "年龄",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "邮箱",
+                        "in": "query",
+                        "name": "email",
+                        "schema": {
+                            "description": "邮箱",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "是否激活",
+                        "in": "query",
+                        "name": "active",
+                        "schema": {
+                            "description": "是否激活",
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "标签列表",
+                        "in": "query",
+                        "name": "tags",
+                        "schema": {
+                            "description": "标签列表",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "description": "获取单个查询参数",
+                        "in": "query",
+                        "name": "user_id",
+                        "schema": {
+                            "title": "user_id",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "获取带默认值的查询参数",
+                        "in": "query",
+                        "name": "format",
+                        "schema": {
+                            "default": "json",
+                            "title": "format",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "summary": "测试混合查询绑定",
+                "tags": [
+                    "query"
+                ]
+            }
+        },
+        "/test/mustbindjson": {
+            "post": {
+                "description": "TestMustBindJSON 测试 MustBindJSON 方法",
+                "operationId": "router.TestMustBindJSON",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/server.TestRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/test/mustbindquery": {
+            "post": {
+                "description": "TestMustBindQuery 测试 MustBindQuery 方法",
+                "operationId": "router.TestMustBindQuery",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/server.TestRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/test/mustbindwith": {
+            "post": {
+                "description": "TestMustBindWith 测试 MustBindWith 方法",
+                "operationId": "router.TestMustBindWith",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/server.TestRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/test/mustbindwith-xml": {
+            "post": {
+                "description": "TestMustBindWithXML 测试 MustBindWith XML",
+                "operationId": "router.TestMustBindWithXML",
+                "requestBody": {
+                    "content": {
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/server.TestRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/test/should-bind-query": {
+            "get": {
+                "description": "新增的查询绑定测试路由",
+                "operationId": "router.TestShouldBindQuery",
+                "parameters": [
+                    {
+                        "description": "用户名 @required",
+                        "in": "query",
+                        "name": "username",
+                        "schema": {
+                            "description": "用户名 @required",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "年龄",
+                        "in": "query",
+                        "name": "age",
+                        "schema": {
+                            "description": "年龄",
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "邮箱",
+                        "in": "query",
+                        "name": "email",
+                        "schema": {
+                            "description": "邮箱",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "是否激活",
+                        "in": "query",
+                        "name": "active",
+                        "schema": {
+                            "description": "是否激活",
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "标签列表",
+                        "in": "query",
+                        "name": "tags",
+                        "schema": {
+                            "description": "标签列表",
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "summary": "测试ShouldBindQuery方法",
+                "tags": [
+                    "query"
+                ]
+            }
+        },
+        "/test/shouldbindwith": {
+            "post": {
+                "description": "TestShouldBindWith 测试 ShouldBindWith 方法",
+                "operationId": "router.TestShouldBindWith",
+                "requestBody": {
+                    "content": {
+                        "application/yaml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/server.TestRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/wrapped-handler": {
             "get": {
                 "description": "wrapped handler",
@@ -548,16 +761,6 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CustomResponseType[b76073db434d]"
-                                }
-                            }
-                        },
-                        "description": "自定义响应函数"
-                    },
                     "400": {
                         "content": {
                             "application/json": {

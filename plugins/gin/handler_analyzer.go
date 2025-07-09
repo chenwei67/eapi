@@ -35,6 +35,7 @@ var (
 		"ShouldBindHeader",
 		"ShouldBindWith",
 		"ShouldBindQuery",
+		"BindQuery",
 		"JSON",
 		"Query",
 		"Param",
@@ -103,13 +104,15 @@ func (p *handlerAnalyzer) Parse() {
 					p.parseBindUri(call)
 				case "BindHeader", "ShouldBindHeader":
 					// TODO
+				case "ShouldBindQuery", "BindQuery":
+					p.parseBindQuery(call)
 				case "ShouldBindWith", "MustBindWith":
 					p.parseBindWith(call)
 				case "JSON":
 					p.parseResBody(call, analyzer.MimeTypeJson)
 				case "XML":
 					p.parseResBody(call, analyzer.MimeApplicationXml)
-				case "Query", "ShouldBindQuery": // query parameter
+				case "Query": // query parameter
 					p.parsePrimitiveParam(call, "query")
 				case "Param": // path parameter
 					p.parsePrimitiveParam(call, "path")
@@ -369,6 +372,46 @@ func (p *handlerAnalyzer) parseBindUri(call *ast.CallExpr) {
 	}
 }
 
+// parseBindQuery 处理 ShouldBindQuery 和 BindQuery 方法
+// 这些方法将结构体字段绑定为查询参数
+func (p *handlerAnalyzer) parseBindQuery(call *ast.CallExpr) {
+	if len(call.Args) != 1 {
+		return
+	}
+	arg0 := call.Args[0]
+
+	// 使用查询参数字段名解析器
+	analyzer.NewSchemaBuilder(p.ctx, "").WithFieldNameParser(p.parseQueryFieldName).ParseExpr(arg0)
+	schema := p.ctx.GetSchemaByExpr(arg0, "")
+	if schema == nil {
+		return
+	}
+	schema = schema.Unref(p.ctx.Doc())
+	if schema == nil {
+		return
+	}
+	
+	// 将结构体的每个字段转换为查询参数
+	for name, property := range schema.Properties {
+		// 移除同名的现有参数
+		p.api.Spec.Parameters = lo.Filter(p.api.Spec.Parameters, func(ref *spec.ParameterRef, i int) bool { return ref.Name != name })
+		
+		// 创建查询参数
+		param := spec.NewQueryParameter(name).WithSchema(property)
+		param.Description = property.Description
+		
+		// 检查是否为必需参数（从schema的required字段中获取）
+		for _, requiredField := range schema.Required {
+			if requiredField == name {
+				param.Required = true
+				break
+			}
+		}
+		
+		p.api.Spec.AddParameter(param)
+	}
+}
+
 func (p *handlerAnalyzer) parseUriFieldName(name string, field *ast.Field) string {
 	tags := tag.Parse(field.Tag.Value)
 	uriTag, ok := tags["uri"]
@@ -377,6 +420,35 @@ func (p *handlerAnalyzer) parseUriFieldName(name string, field *ast.Field) strin
 	}
 	res, _, _ := strings.Cut(uriTag, ",")
 	return res
+}
+
+// parseQueryFieldName 解析查询参数的字段名
+// 支持 form 和 json 标签
+func (p *handlerAnalyzer) parseQueryFieldName(name string, field *ast.Field) string {
+	if field.Tag == nil {
+		return name
+	}
+	
+	tags := tag.Parse(field.Tag.Value)
+	
+	// 优先使用 form 标签
+	if formTag, ok := tags["form"]; ok {
+		res, _, _ := strings.Cut(formTag, ",")
+		if res != "" && res != "-" {
+			return res
+		}
+	}
+	
+	// 其次使用 json 标签
+	if jsonTag, ok := tags["json"]; ok {
+		res, _, _ := strings.Cut(jsonTag, ",")
+		if res != "" && res != "-" {
+			return res
+		}
+	}
+	
+	// 如果没有标签或标签为空，返回字段名
+	return name
 }
 
 // parseBindWith 处理 BindWith, ShouldBindWith, MustBindWith 方法
