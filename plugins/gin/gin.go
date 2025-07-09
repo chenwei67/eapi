@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -57,6 +58,7 @@ func (e *Plugin) Name() string {
 	return "gin"
 }
 
+// 匹配 .Group 方法，参数必须是字符串字面量
 func (e *Plugin) assignStmt(ctx *analyzer.Context, node ast.Node) {
 	assign := node.(*ast.AssignStmt)
 	if len(assign.Rhs) != 1 || len(assign.Lhs) != 1 {
@@ -81,6 +83,15 @@ func (e *Plugin) assignStmt(ctx *analyzer.Context, node ast.Node) {
 			}
 			arg0, ok := callExpr.Args[0].(*ast.BasicLit)
 			if !ok {
+				// 获取源码位置信息
+				pos := ctx.Package().Fset.Position(callExpr.Pos())
+				argPos := ctx.Package().Fset.Position(callExpr.Args[0].Pos())
+				argType := "unknown"
+				if callExpr.Args[0] != nil {
+					argType = fmt.Sprintf("%T", callExpr.Args[0])
+				}
+				analyzer.LogError("first argument of %s.%s must be a string literal, got %s instead. Location: %s:%d:%d, Argument location: %s:%d:%d, CallExpr: %#v", 
+					typeName, fnName, argType, pos.Filename, pos.Line, pos.Column, argPos.Filename, argPos.Line, argPos.Column, *callExpr)
 				return
 			}
 			selExpr := callExpr.Fun.(*ast.SelectorExpr)
