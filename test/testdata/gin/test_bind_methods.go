@@ -48,14 +48,14 @@ func TestBindWith(c *gin.Context) {
 // TestMustBindQuery 测试 MustBindQuery 方法
 func TestMustBindQuery(c *gin.Context) {
 	var req TestRequest
-	c.MustBindWith(&req)
+	c.MustBindWith(&req, binding.Query)
 	c.JSON(http.StatusOK, gin.H{"message": "MustBindQuery success", "data": req})
 }
 
 // TestMustBindJSON 测试 MustBindJSON 方法
 func TestMustBindJSON(c *gin.Context) {
 	var req TestRequest
-	c.MustBindWith(&req)
+	c.MustBindWith(&req, binding.JSON)
 	c.JSON(http.StatusOK, gin.H{"message": "MustBindJSON success", "data": req})
 }
 
