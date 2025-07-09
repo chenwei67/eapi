@@ -396,7 +396,9 @@ func (s *SchemaBuilder) parseType(t types.Type) *spec.SchemaRef {
 			contextInfo = fmt.Sprintf(" in package %s", s.ctx.Package().PkgPath)
 		}
 		if s.ctx.File() != nil {
-			contextInfo += fmt.Sprintf(" at file %s", s.ctx.File().Name.Name)
+			// Get actual file name from position instead of package name
+			filePos := s.ctx.Package().Fset.Position(s.ctx.File().Pos())
+			contextInfo += fmt.Sprintf(" at file %s", filePos.Filename)
 		}
 		s.ctx.StrictError("unknown type %s%s, def type: %T", t.String(), contextInfo, def)
 		return spec.NewSchema().WithExtendedType(spec.NewUnknownExtType()).NewRef()
